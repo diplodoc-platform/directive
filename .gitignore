@@ -1,0 +1,19 @@
+.DS_Store
+.vscode
+.idea
+.env
+
+/plugin
+/runtime
+/coverage
+node_modules
+
+# libraries
+npm-debug.log
+
+
+.history
+/lib
+/dist
+/build
+/cache
