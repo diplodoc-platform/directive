@@ -2,7 +2,7 @@
 
 import {build} from 'esbuild';
 
-import tsConfig from '../tsconfig.json' assert { type: "json" };
+import tsConfig from '../tsconfig.json' assert {type: 'json'};
 
 const outDir = 'build';
 
@@ -11,7 +11,7 @@ const common = {
     bundle: true,
     sourcemap: true,
     target: tsConfig.compilerOptions.target,
-    tsconfig: './tsconfig.json',
+    tsconfig: './tsconfig.publish.json',
 };
 
 build({

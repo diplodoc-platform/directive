@@ -21,14 +21,17 @@
   "scripts": {
     "build": "run-p build:*",
     "build:js": "./esbuild/build.mjs",
-    "build:declarations": "tsc --emitDeclarationOnly --outDir ./build",
-    "test": "cd tests && npm ci && npm test",
+    "build:declarations": "tsc --project tsconfig.publish.json --emitDeclarationOnly --outDir ./build",
+    "test": "cd tests && npm ci && npm test -- --ci",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "npm run build",
     "lint": "lint update && lint",
     "lint:fix": "lint update && lint fix",
     "pre-commit": "lint update && lint-staged",
     "prepare": "husky"
+  },
+  "dependencies": {
+    "markdown-it-directive": "2.0.2"
   },
   "devDependencies": {
     "@diplodoc/lint": "^1.2.0",
