@@ -2,7 +2,7 @@
 
 import {build} from 'esbuild';
 
-import tsConfig from '../tsconfig.json' assert { type: "json" };
+import tsConfig from '../tsconfig.json' assert {type: 'json'};
 
 const outDir = 'build';
 
