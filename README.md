@@ -109,13 +109,23 @@ All of parameters groups – `[]`, `()`, `{}` – are optional, but their order 
   ): void;
   ```
 
-- `registerBlockDirective()` – register handler for new block directive – leaf and container block together.
+- `registerLeafBlockDirective()` – register handler for new leaf block directive.
 
   ```ts
-  function registerBlockDirective(
+  function registerLeafBlockDirective(
     md: MarkdownIt,
     name: string,
-    handler: BlockDirectiveHandler,
+    handler: LeafBlockDirectiveHandler,
+  ): void;
+  ```
+
+- `registerContainerDirective()` – register handler for new container block.
+  ```ts
+  function registerContainerDirective(md: MarkdownIt, config: ContainerDirectiveConfig): void;
+  function registerContainerDirective(
+    md: MarkdownIt,
+    name: string,
+    handler: ContainerDirectiveHandler,
   ): void;
   ```
 

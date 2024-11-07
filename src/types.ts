@@ -1,5 +1,7 @@
+import type MarkdownIt from 'markdown-it';
 import type StateBlock from 'markdown-it/lib/rules_block/state_block';
 import type StateInline from 'markdown-it/lib/rules_inline/state_inline';
+import type {CONTAINER_KEY, LEAF_BLOCK_KEY} from './const';
 
 export type {StateBlock, StateInline};
 
@@ -25,13 +27,16 @@ type BlockContent = {
     endLine: number;
 };
 
-export type BlockDirectiveParams = {
+export type LeafBlockDirectiveParams = {
     startLine: number;
     endLine: number;
     attrs?: DirectiveAttrs;
     dests?: DirectiveDests;
-    content?: BlockContent;
     inlineContent?: InlineContent;
+};
+
+export type ContainerDirectiveParams = LeafBlockDirectiveParams & {
+    content: BlockContent;
 };
 
 export type InlineDirectiveParams = {
@@ -42,19 +47,25 @@ export type InlineDirectiveParams = {
     content?: InlineContent;
 };
 
-export type BlockDirectiveHandler = (state: StateBlock, params: BlockDirectiveParams) => boolean;
+export type ContainerDirectiveHandler = (
+    state: StateBlock,
+    params: ContainerDirectiveParams,
+) => boolean;
+export type LeafBlockDirectiveHandler = (
+    state: StateBlock,
+    params: LeafBlockDirectiveParams,
+) => boolean;
 export type InlineDirectiveHandler = (state: StateInline, params: InlineDirectiveParams) => boolean;
 
 type TokensDesc = {
     tag: string;
     token: string;
-    attrs?: DirectiveAttrs | ((params: BlockDirectiveParams) => DirectiveAttrs);
+    attrs?: DirectiveAttrs | ((params: LeafBlockDirectiveParams) => DirectiveAttrs);
 };
 
-export type BlockDirectiveConfig = {
+export type ContainerDirectiveConfig = {
     name: string;
-    type: 'container';
-    match: (params: BlockDirectiveParams, state: StateBlock) => boolean;
+    match: (params: LeafBlockDirectiveParams, state: StateBlock) => boolean;
     container: TokensDesc;
     inlineContent?: TokensDesc & {
         /** @default true */
@@ -65,6 +76,11 @@ export type BlockDirectiveConfig = {
     contentTokenizer?: (
         state: StateBlock,
         content: BlockContent,
-        params: BlockDirectiveParams,
+        params: LeafBlockDirectiveParams,
     ) => void;
 };
+
+export interface MdItWithHandlers extends MarkdownIt {
+    [CONTAINER_KEY]: Record<string, ContainerDirectiveHandler>;
+    [LEAF_BLOCK_KEY]: Record<string, LeafBlockDirectiveHandler>;
+}

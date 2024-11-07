@@ -10,7 +10,11 @@ export {
     disableBlockDirectives,
     disableInlineDirectives,
 } from './helpers';
-export {registerBlockDirective, registerInlineDirective} from './helpers/registrars';
+export {
+    registerContainerDirective,
+    registerLeafBlockDirective,
+    registerInlineDirective,
+} from './helpers/registrars';
 export {
     tokenizeBlockContent,
     tokenizeInlineContent,
@@ -20,9 +24,11 @@ export {
 export type {
     DirectiveAttrs,
     DirectiveDests,
-    BlockDirectiveParams,
-    BlockDirectiveConfig,
-    BlockDirectiveHandler,
+    LeafBlockDirectiveParams,
+    LeafBlockDirectiveHandler,
+    ContainerDirectiveConfig,
+    ContainerDirectiveParams,
+    ContainerDirectiveHandler,
     InlineDirectiveParams,
     InlineDirectiveHandler,
 } from './types';

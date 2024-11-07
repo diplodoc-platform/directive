@@ -1,5 +1,11 @@
 import type MarkdownIt from 'markdown-it';
-import type {BlockDirectiveParams, InlineDirectiveParams, StateBlock, StateInline} from '../types';
+import type {
+    ContainerDirectiveParams,
+    InlineDirectiveParams,
+    LeafBlockDirectiveParams,
+    StateBlock,
+    StateInline,
+} from '../types';
 
 export function tokenizeInlineContent(
     state: StateInline,
@@ -19,7 +25,7 @@ export function tokenizeInlineContent(
 
 export function tokenizeBlockContent(
     state: StateBlock,
-    content: NonNullable<BlockDirectiveParams['content']>,
+    content: NonNullable<ContainerDirectiveParams['content']>,
     parentType?: string,
 ): void {
     const oldParent = state.parentType;
@@ -38,7 +44,7 @@ export function tokenizeBlockContent(
 
 export function createBlockInlineToken(
     state: StateBlock,
-    {inlineContent, startLine}: BlockDirectiveParams,
+    {inlineContent, startLine}: LeafBlockDirectiveParams,
 ): MarkdownIt.Token {
     const token = state.push('inline', '', 0);
     token.children = [];

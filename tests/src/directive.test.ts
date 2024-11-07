@@ -3,15 +3,17 @@ import transform from '@diplodoc/transform';
 import dd from 'ts-dedent';
 
 import {
-    type BlockDirectiveParams,
+    type ContainerDirectiveParams,
     type InlineDirectiveParams,
+    type LeafBlockDirectiveParams,
     createBlockInlineToken,
     directiveParser,
     disableBlockDirectives,
     disableInlineDirectives,
     enableInlineDirectives,
-    registerBlockDirective,
+    registerContainerDirective,
     registerInlineDirective,
+    registerLeafBlockDirective,
     tokenizeBlockContent,
     tokenizeInlineContent,
 } from '../../src';
@@ -31,8 +33,8 @@ describe('Directive', () => {
         const leafHandler = jest.fn(() => false);
         const blockHandler = jest.fn(() => false);
         registerInlineDirective(md, 'inl', inlineHandler);
-        registerBlockDirective(md, 'leaf', leafHandler);
-        registerBlockDirective(md, 'blck', blockHandler);
+        registerLeafBlockDirective(md, 'leaf', leafHandler);
+        registerContainerDirective(md, 'blck', blockHandler);
         md.parse(
             dd`
             :inl[]
@@ -225,10 +227,10 @@ describe('Directive', () => {
     describe('leaf block', () => {
         it('should parse directive without parameters', () => {
             const handler = jest.fn(() => false);
-            html('::leaf', {plugins: [(md) => registerBlockDirective(md, 'leaf', handler)]});
+            html('::leaf', {plugins: [(md) => registerLeafBlockDirective(md, 'leaf', handler)]});
             expect(handler).toHaveBeenCalledTimes(1);
             // @ts-expect-error
-            expect(handler.mock.calls[0][1]).toStrictEqual({
+            expect(handler.mock.calls[0][1]).toStrictEqual<LeafBlockDirectiveParams>({
                 endLine: 1,
                 startLine: 0,
             });
@@ -236,10 +238,12 @@ describe('Directive', () => {
 
         it('should parse directive with empty parameters', () => {
             const handler = jest.fn(() => false);
-            html('::leaf[](){}', {plugins: [(md) => registerBlockDirective(md, 'leaf', handler)]});
+            html('::leaf[](){}', {
+                plugins: [(md) => registerLeafBlockDirective(md, 'leaf', handler)],
+            });
             expect(handler).toHaveBeenCalledTimes(1);
             // @ts-expect-error
-            expect(handler.mock.calls[0][1]).toStrictEqual<BlockDirectiveParams>({
+            expect(handler.mock.calls[0][1]).toStrictEqual<LeafBlockDirectiveParams>({
                 attrs: {},
                 dests: {_original_dests: []},
                 endLine: 1,
@@ -262,7 +266,7 @@ describe('Directive', () => {
                 
                 :::
                 `,
-                {plugins: [(md) => registerBlockDirective(md, 'block', handler)]},
+                {plugins: [(md) => registerContainerDirective(md, 'block', handler)]},
             );
             expect(handler).toHaveBeenCalledTimes(1);
             // @ts-expect-error
@@ -285,11 +289,11 @@ describe('Directive', () => {
                 content
                 :::
                 `,
-                {plugins: [(md) => registerBlockDirective(md, 'block', handler)]},
+                {plugins: [(md) => registerContainerDirective(md, 'block', handler)]},
             );
             expect(handler).toHaveBeenCalledTimes(1);
             // @ts-expect-error
-            expect(handler.mock.calls[0][1]).toStrictEqual<BlockDirectiveParams>({
+            expect(handler.mock.calls[0][1]).toStrictEqual<ContainerDirectiveParams>({
                 attrs: {},
                 content: {
                     endLine: 2,
@@ -317,11 +321,11 @@ describe('Directive', () => {
 
                 :::
                 `,
-                {plugins: [(md) => registerBlockDirective(md, 'dir', handler)]},
+                {plugins: [(md) => registerContainerDirective(md, 'dir', handler)]},
             );
             // @ts-expect-error
-            const params: BlockDirectiveParams = handler.mock.calls[0][1];
-            expect(params.content?.raw).toStrictEqual(dd`
+            const params: ContainerDirectiveParams = handler.mock.calls[0][1];
+            expect(params.content.raw).toStrictEqual(dd`
 
                 > - list in qoute
 
@@ -343,11 +347,11 @@ describe('Directive', () => {
                 after
                 :::
                 `,
-                {plugins: [(md) => registerBlockDirective(md, 'dir', handler)]},
+                {plugins: [(md) => registerContainerDirective(md, 'dir', handler)]},
             );
             // @ts-expect-error
-            const params: BlockDirectiveParams = handler.mock.calls[0][1];
-            expect(params.content?.raw).toStrictEqual(dd`
+            const params: ContainerDirectiveParams = handler.mock.calls[0][1];
+            expect(params.content.raw).toStrictEqual(dd`
                 before
 
                 :::another
@@ -369,7 +373,7 @@ describe('Directive', () => {
 
                 :::
                 `,
-                {plugins: [(md) => registerBlockDirective(md, 'test', handler)]},
+                {plugins: [(md) => registerContainerDirective(md, 'test', handler)]},
             );
             expect(handler).toHaveBeenCalledTimes(1);
             // @ts-expect-error
@@ -406,8 +410,8 @@ describe('Directive', () => {
                         plugins: [
                             (md) => {
                                 registerInlineDirective(md, 'inline', inlineHandler);
-                                registerBlockDirective(md, 'leaf', leafHandler);
-                                registerBlockDirective(md, 'block', blockHandler);
+                                registerLeafBlockDirective(md, 'leaf', leafHandler);
+                                registerContainerDirective(md, 'block', blockHandler);
                                 disableInlineDirectives(md);
                             },
                         ],
@@ -436,8 +440,8 @@ describe('Directive', () => {
                         plugins: [
                             (md) => {
                                 registerInlineDirective(md, 'inline', inlineHandler);
-                                registerBlockDirective(md, 'leaf', leafHandler);
-                                registerBlockDirective(md, 'block', blockHandler);
+                                registerLeafBlockDirective(md, 'leaf', leafHandler);
+                                registerContainerDirective(md, 'block', blockHandler);
                                 disableBlockDirectives(md);
                             },
                         ],
@@ -452,7 +456,7 @@ describe('Directive', () => {
         describe('tokenizeBlockContent', () => {
             it('should parse nested directive', () => {
                 const md = new MarkdownIt().use(directiveParser());
-                registerBlockDirective(md, 'test', (state, {content}) => {
+                registerContainerDirective(md, 'test', (state, {content}) => {
                     if (content) {
                         tokenizeBlockContent(state, content);
                         return true;
@@ -512,7 +516,7 @@ describe('Directive', () => {
         describe('createBlockInlineToken', () => {
             it('should parse inline content in block diagram', () => {
                 const md = new MarkdownIt().use(directiveParser());
-                registerBlockDirective(md, 'blck', (state, params) => {
+                registerLeafBlockDirective(md, 'blck', (state, params) => {
                     if (!params.inlineContent) {
                         return false;
                     }
