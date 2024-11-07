@@ -21,6 +21,7 @@ export type {
     DirectiveAttrs,
     DirectiveDests,
     BlockDirectiveParams,
+    BlockDirectiveConfig,
     BlockDirectiveHandler,
     InlineDirectiveParams,
     InlineDirectiveHandler,

@@ -44,3 +44,27 @@ export type InlineDirectiveParams = {
 
 export type BlockDirectiveHandler = (state: StateBlock, params: BlockDirectiveParams) => boolean;
 export type InlineDirectiveHandler = (state: StateInline, params: InlineDirectiveParams) => boolean;
+
+type TokensDesc = {
+    tag: string;
+    token: string;
+    attrs?: DirectiveAttrs | ((params: BlockDirectiveParams) => DirectiveAttrs);
+};
+
+export type BlockDirectiveConfig = {
+    name: string;
+    type: 'container';
+    match: (params: BlockDirectiveParams, state: StateBlock) => boolean;
+    container: TokensDesc;
+    inlineContent?: TokensDesc & {
+        /** @default true */
+        required?: boolean;
+    };
+    content?: TokensDesc;
+    /** If not passed – default tokenizer will be used */
+    contentTokenizer?: (
+        state: StateBlock,
+        content: BlockContent,
+        params: BlockDirectiveParams,
+    ) => void;
+};
