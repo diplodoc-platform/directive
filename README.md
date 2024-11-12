@@ -10,23 +10,40 @@ Add new MarkdownIt-plugin or transformer extension, that plug-in a directive par
 
 ```ts
 import type MarkdownIt from 'markdown-it';
-import {directiveParser, registerBlockDirective} from '@diplodoc/directive';
+import {directiveParser, registerContainerDirective} from '@diplodoc/directive';
 
 export function simpleBlockPlugin(): MarkdownIt.PluginSimple {
   return (md) => {
     md.use(directiveParser());
 
-    registerBlockDirective(md, 'block', (state, params) => {
+    // register container directive using handler
+    registerContainerDirective(md, 'block', (state, params) => {
       if (!params.content) return false;
 
       let token = state.push('simple_block_open', 'div', 1);
-      token.attrSet('class', 'simple_block');
+      token.attrSet('class', 'simple-block');
 
       tokenizeBlockContent(state, params.content);
 
       token = state.push('simple_block_close', 'div', -1);
 
       return true;
+    });
+
+    // or using config-object
+    registerContainerDirective(md, {
+      name: 'block',
+      match(_params, state) {
+        // here you can add something to state.env
+        return true;
+      },
+      container: {
+        tag: 'div',
+        token: 'simple_block',
+        attrs: {
+          class: 'simple-block',
+        },
+      },
     });
   };
 }
@@ -59,7 +76,7 @@ const html = md.render(markup);
 `html` variable will have the value:
 
 ```html
-<div class="simple_block">
+<div class="simple-block">
   <h3>Heading 3 inside a simple block</h3>
 </div>
 ```
@@ -119,7 +136,7 @@ All of parameters groups – `[]`, `()`, `{}` – are optional, but their order 
   ): void;
   ```
 
-- `registerContainerDirective()` – register handler for new container block.
+- `registerContainerDirective()` – register handler for new container block or configure it using config-object.
   ```ts
   function registerContainerDirective(md: MarkdownIt, config: ContainerDirectiveConfig): void;
   function registerContainerDirective(
