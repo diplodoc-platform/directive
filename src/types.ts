@@ -65,7 +65,8 @@ type TokensDesc = {
 
 export type ContainerDirectiveConfig = {
     name: string;
-    match: (params: LeafBlockDirectiveParams, state: StateBlock) => boolean;
+    type?: 'container_block';
+    match: (params: ContainerDirectiveParams, state: StateBlock) => boolean;
     container: TokensDesc;
     inlineContent?: TokensDesc & {
         /** @default true */
@@ -76,8 +77,15 @@ export type ContainerDirectiveConfig = {
     contentTokenizer?: (
         state: StateBlock,
         content: BlockContent,
-        params: LeafBlockDirectiveParams,
+        params: ContainerDirectiveParams,
     ) => void;
+};
+
+export type CodeContainerDirectiveConfig = {
+    name: string;
+    type: 'code_block';
+    match: (params: ContainerDirectiveParams, state: StateBlock) => boolean;
+    container: TokensDesc;
 };
 
 export interface MdItWithHandlers extends MarkdownIt {

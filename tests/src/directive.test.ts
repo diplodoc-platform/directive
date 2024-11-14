@@ -388,6 +388,33 @@ describe('Directive', () => {
                 startLine: 0,
             });
         });
+
+        it('should add code container handler via config', () => {
+            const md = new MarkdownIt().use(directiveParser());
+            registerContainerDirective(md, {
+                name: 'js',
+                type: 'code_block',
+                match: () => true,
+                container: {
+                    token: 'code_js',
+                    tag: 'code',
+                    attrs: {class: 'code-js'},
+                },
+            });
+            const tokens = md.parse(
+                dd`
+
+
+                :::js
+                (function(window) {
+                window.alert('Hello world!');
+                })(window);
+                :::
+                `,
+                {},
+            );
+            expect(tokens).toMatchSnapshot();
+        });
     });
 
     describe('helpers', () => {
