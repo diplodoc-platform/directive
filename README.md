@@ -138,7 +138,10 @@ All of parameters groups – `[]`, `()`, `{}` – are optional, but their order 
 
 - `registerContainerDirective()` – register handler for new container block or configure it using config-object.
   ```ts
-  function registerContainerDirective(md: MarkdownIt, config: ContainerDirectiveConfig): void;
+  function registerContainerDirective(
+    md: MarkdownIt,
+    config: ContainerDirectiveConfig | CodeContainerDirectiveConfig,
+  ): void;
   function registerContainerDirective(
     md: MarkdownIt,
     name: string,

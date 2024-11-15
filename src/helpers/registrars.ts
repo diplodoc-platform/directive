@@ -8,6 +8,7 @@ import type {
     MarkdownItWithDirectives,
 } from 'markdown-it-directive';
 import type {
+    CodeContainerDirectiveConfig,
     ContainerDirectiveConfig,
     ContainerDirectiveHandler,
     ContainerDirectiveParams,
@@ -48,7 +49,10 @@ export function registerLeafBlockDirective(
     (md as MarkdownItWithDirectives).blockDirectives[name] = getBlockDefaultHandler(md, name);
 }
 
-export function registerContainerDirective(md: MarkdownIt, config: ContainerDirectiveConfig): void;
+export function registerContainerDirective(
+    md: MarkdownIt,
+    config: ContainerDirectiveConfig | CodeContainerDirectiveConfig,
+): void;
 export function registerContainerDirective(
     md: MarkdownIt,
     name: string,
@@ -56,12 +60,17 @@ export function registerContainerDirective(
 ): void;
 export function registerContainerDirective(
     md: MarkdownIt,
-    nameOrConfig: string | ContainerDirectiveConfig,
+    nameOrConfig: string | ContainerDirectiveConfig | CodeContainerDirectiveConfig,
     maybeHandler?: ContainerDirectiveHandler,
 ): void {
     const [name, handler]: [string, ContainerDirectiveHandler] = isString(nameOrConfig)
         ? [nameOrConfig, maybeHandler!]
-        : [nameOrConfig.name, buildContainerHandler(nameOrConfig)];
+        : [
+              nameOrConfig.name,
+              nameOrConfig.type === 'code_block'
+                  ? buildCodeContainerHandler(nameOrConfig)
+                  : buildContainerHandler(nameOrConfig),
+          ];
 
     (md as MdItWithHandlers)[CONTAINER_KEY] ||= {};
     (md as MdItWithHandlers)[CONTAINER_KEY][name] = handler;
@@ -150,6 +159,37 @@ function buildContainerHandler(config: ContainerDirectiveConfig): ContainerDirec
         }
 
         token = state.push(container.token + '_close', container.tag, -1);
+
+        return true;
+    };
+}
+
+function buildCodeContainerHandler(
+    config: CodeContainerDirectiveConfig,
+): ContainerDirectiveHandler {
+    return (state, params) => {
+        if (!params.content) {
+            return false;
+        }
+        if (!config.match(params, state)) {
+            return false;
+        }
+
+        const {name, container} = config;
+
+        const token = state.push(container.token, container.tag, 0);
+        // set fields like for fence token
+        token.map = [params.startLine, params.endLine];
+        token.content = params.content.raw;
+        token.markup = ':::';
+        token.info = name;
+
+        if (container.attrs) {
+            const attrs: DirectiveAttrs = isFunction(container.attrs)
+                ? container.attrs(params)
+                : container.attrs;
+            token.attrs = Object.entries(attrs);
+        }
 
         return true;
     };

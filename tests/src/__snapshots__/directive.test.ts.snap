@@ -1,5 +1,36 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Directive block with content should add code container handler via config 1`] = `
+[
+  Token {
+    "attrs": [
+      [
+        "class",
+        "code-js",
+      ],
+    ],
+    "block": true,
+    "children": null,
+    "content": "(function(window) {
+window.alert('Hello world!');
+})(window);
+",
+    "hidden": false,
+    "info": "js",
+    "level": 0,
+    "map": [
+      2,
+      7,
+    ],
+    "markup": ":::",
+    "meta": null,
+    "nesting": 0,
+    "tag": "code",
+    "type": "code_js",
+  },
+]
+`;
+
 exports[`Directive helpers createBlockInlineToken should parse inline content in block diagram 1`] = `
 [
   Token {
