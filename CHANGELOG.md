@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/diplodoc-platform/directive/compare/v0.2.1...v0.3.0) (2024-11-27)
+
+
+### Features
+
+* enable inline directives by default ([#9](https://github.com/diplodoc-platform/directive/issues/9)) ([a5ec3d9](https://github.com/diplodoc-platform/directive/commit/a5ec3d97a21c3dc8f324992030c55a7fe7d69d6e))
+
 ## [0.2.1](https://github.com/diplodoc-platform/directive/compare/v0.2.0...v0.2.1) (2024-11-27)
 
 
