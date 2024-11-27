@@ -135,7 +135,7 @@ describe('Directive', () => {
             expect(handler).toHaveBeenCalled();
         });
 
-        it('should throw error when parsing something like inline directive and reference link', () => {
+        it('should not throw error when parsing something like inline directive and reference link', () => {
             /* 
                 Caught a bug that if there is something similar to an inline directive and a reference link,
                 it will be considered an inline directive and will fail during parsing
@@ -156,7 +156,7 @@ describe('Directive', () => {
             } catch (err) {
                 // console.error(err);
             }
-            expect(fn).toThrow("Cannot read properties of undefined (reading 'trim')");
+            expect(fn).not.toThrow();
         });
 
         it('should not throw error with disabled parsing of inline directives', () => {

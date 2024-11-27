@@ -201,14 +201,10 @@ function buildInlineParams(args: DirectiveInlineHandlerArgs): InlineDirectivePar
         endPos: args.directiveEnd,
     };
     if (args.attrs !== undefined) {
-        // @ts-expect-error types fixed in markdown-it-directive@2.0.3
         params.attrs = args.attrs;
     }
     if (args.dests !== undefined) {
-        params.dests = buildDests(
-            // @ts-expect-error types fixed in markdown-it-directive@2.0.3
-            args.dests,
-        );
+        params.dests = buildDests(args.dests);
     }
     if (args.content !== undefined) {
         params.content = {
@@ -226,14 +222,10 @@ function buildLeafBlockParams(args: DirectiveBlockHandlerArgs): LeafBlockDirecti
         endLine: args.directiveEndLine,
     };
     if (args.attrs !== undefined) {
-        // @ts-expect-error types fixed in markdown-it-directive@2.0.3
         params.attrs = args.attrs;
     }
     if (args.dests !== undefined) {
-        params.dests = buildDests(
-            // @ts-expect-error fix in https://github.com/hilookas/markdown-it-directive/pull/8
-            args.dests,
-        );
+        params.dests = buildDests(args.dests);
     }
     if (args.inlineContent !== undefined) {
         params.inlineContent = {
