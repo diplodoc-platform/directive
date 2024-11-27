@@ -43,10 +43,7 @@ export type {
  */
 export const directiveParser = (): MarkdownIt.PluginSimple => {
     return (md) => {
-        directivePlugin(
-            // @ts-expect-error – bad types in markdown-it-directive
-            md,
-        );
+        directivePlugin(md);
 
         disableInlineDirectives(md);
     };
