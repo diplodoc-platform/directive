@@ -100,8 +100,6 @@ All of parameters groups – `[]`, `()`, `{}` – are optional, but their order 
 - `()` – used for something like required identifier (id, url, etc.);
 - `{}` – used to pass optional named arguments / attributes / `key=value` pairs.
 
-> Note: inline directives disabled by default. You can enable them using `enableInlineDirectives()` helper.
-
 ## Helpers
 
 ### Enable or disable some of directive types
