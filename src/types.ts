@@ -55,22 +55,22 @@ export type LeafBlockDirectiveHandler = (
 ) => boolean;
 export type InlineDirectiveHandler = (state: StateInline, params: InlineDirectiveParams) => boolean;
 
-type TokensDesc = {
+type TokensDesc<P> = {
     tag: string;
     token: string;
-    attrs?: DirectiveAttrs | ((params: LeafBlockDirectiveParams) => DirectiveAttrs);
+    attrs?: DirectiveAttrs | ((params: P) => DirectiveAttrs);
 };
 
 export type ContainerDirectiveConfig = {
     name: string;
     type?: 'container_block';
     match: (params: ContainerDirectiveParams, state: StateBlock) => boolean;
-    container: TokensDesc;
-    inlineContent?: TokensDesc & {
+    container: TokensDesc<ContainerDirectiveParams>;
+    inlineContent?: TokensDesc<ContainerDirectiveParams> & {
         /** @default true */
         required?: boolean;
     };
-    content?: TokensDesc;
+    content?: TokensDesc<ContainerDirectiveParams>;
     /** If not passed – default tokenizer will be used */
     contentTokenizer?: (
         state: StateBlock,
@@ -83,7 +83,7 @@ export type CodeContainerDirectiveConfig = {
     name: string;
     type: 'code_block';
     match: (params: ContainerDirectiveParams, state: StateBlock) => boolean;
-    container: TokensDesc;
+    container: TokensDesc<ContainerDirectiveParams>;
 };
 
 export interface MdItWithHandlers extends MarkdownIt {
