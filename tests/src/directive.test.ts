@@ -10,7 +10,6 @@ import {
     directiveParser,
     disableBlockDirectives,
     disableInlineDirectives,
-    enableInlineDirectives,
     registerContainerDirective,
     registerInlineDirective,
     registerLeafBlockDirective,
@@ -20,14 +19,14 @@ import {
 
 const html = (text: string, {plugins}: {plugins?: MarkdownIt.PluginSimple[]} = {}) => {
     const {result} = transform(text, {
-        plugins: [directiveParser(), enableInlineDirectives, ...(plugins || [])],
+        plugins: [directiveParser(), ...(plugins || [])],
     });
 
     return result.html;
 };
 
 describe('Directive', () => {
-    it('should not parse inline directive by default', () => {
+    it.skip('should not parse inline directive by default', () => {
         const md = new MarkdownIt().use(directiveParser());
         const inlineHandler = jest.fn(() => false);
         const leafHandler = jest.fn(() => false);
@@ -518,7 +517,7 @@ describe('Directive', () => {
 
         describe('tokenizeInlineContent', () => {
             it('should parse content in inline directive', () => {
-                const md = new MarkdownIt().use(directiveParser()).use(enableInlineDirectives);
+                const md = new MarkdownIt().use(directiveParser());
                 registerInlineDirective(md, 'inl', (state, params) => {
                     if (!params.content) {
                         return false;
