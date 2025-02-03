@@ -181,7 +181,7 @@ function buildCodeContainerHandler(
         // set fields like for fence token
         token.map = [params.startLine, params.endLine];
         token.content = params.content.raw;
-        token.markup = ':::';
+        token.markup = ':::\n';
         token.info = name;
 
         if (container.attrs) {
