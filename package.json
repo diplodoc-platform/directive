@@ -30,7 +30,7 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "markdown-it-directive": "2.0.4"
+    "markdown-it-directive": "2.0.5"
   },
   "devDependencies": {
     "@diplodoc/lint": "^1.2.0",
