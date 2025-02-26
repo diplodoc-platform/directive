@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/diplodoc-platform/directive/compare/v0.3.0...v0.3.1) (2025-02-26)
+
+
+### Bug Fixes
+
+* bumped markdown-it-directive for closing & nesting fixes ([#12](https://github.com/diplodoc-platform/directive/issues/12)) ([16dcfd8](https://github.com/diplodoc-platform/directive/commit/16dcfd8d3dd6cb11cb02c904c6ad1bd95115d852))
+
 ## [0.3.0](https://github.com/diplodoc-platform/directive/compare/v0.2.1...v0.3.0) (2024-11-27)
 
 
