@@ -398,6 +398,7 @@ describe('Directive', () => {
                     token: 'code_js',
                     tag: 'code',
                     attrs: {class: 'code-js'},
+                    meta: {code: true, lang: 'js'},
                 },
             });
             const tokens = md.parse(

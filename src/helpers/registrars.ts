@@ -20,6 +20,7 @@ import type {
     LeafBlockDirectiveHandler,
     LeafBlockDirectiveParams,
     MdItWithHandlers,
+    TokensDesc,
 } from '../types';
 
 import {isFunction, isString} from '../utils';
@@ -116,21 +117,11 @@ function buildContainerHandler(config: ContainerDirectiveConfig): ContainerDirec
         let token = state.push(container.token + '_open', container.tag, 1);
         token.map = [params.startLine, params.endLine];
         token.markup = ':::' + config.name;
-        if (container.attrs) {
-            const attrs: DirectiveAttrs = isFunction(container.attrs)
-                ? container.attrs(params)
-                : container.attrs;
-            token.attrs = Object.entries(attrs);
-        }
+        applyTokenFields(token, container, params);
 
         if (inlineContent) {
             token = state.push(inlineContent.token + '_open', inlineContent.tag, 1);
-            if (inlineContent.attrs) {
-                const attrs: DirectiveAttrs = isFunction(inlineContent.attrs)
-                    ? inlineContent.attrs(params)
-                    : inlineContent.attrs;
-                token.attrs = Object.entries(attrs);
-            }
+            applyTokenFields(token, inlineContent, params);
 
             token = createBlockInlineToken(state, params);
 
@@ -140,12 +131,7 @@ function buildContainerHandler(config: ContainerDirectiveConfig): ContainerDirec
         if (content) {
             token = state.push(content.token + '_open', content.tag, 1);
             token.map = [params.startLine + 1, params.endLine - 1];
-            if (content.attrs) {
-                const attrs: DirectiveAttrs = isFunction(content.attrs)
-                    ? content.attrs(params)
-                    : content.attrs;
-                token.attrs = Object.entries(attrs);
-            }
+            applyTokenFields(token, content, params);
         }
 
         if (contentTokenizer) {
@@ -183,13 +169,7 @@ function buildCodeContainerHandler(
         token.content = params.content.raw;
         token.markup = ':::';
         token.info = name;
-
-        if (container.attrs) {
-            const attrs: DirectiveAttrs = isFunction(container.attrs)
-                ? container.attrs(params)
-                : container.attrs;
-            token.attrs = Object.entries(attrs);
-        }
+        applyTokenFields(token, container, params);
 
         return true;
     };
@@ -263,4 +243,19 @@ function buildDests(orig: DirectiveDestsOrig): DirectiveDests {
     }
 
     return dests;
+}
+
+function applyTokenFields<P>(
+    token: MarkdownIt.Token,
+    {attrs, meta}: TokensDesc<P>,
+    params: P,
+): void {
+    if (attrs !== undefined) {
+        const value: DirectiveAttrs = isFunction(attrs) ? attrs(params) : attrs;
+        token.attrs = Object.entries(value);
+    }
+    if (meta !== undefined) {
+        const value: object = isFunction(meta) ? meta(params) : meta;
+        token.meta = value;
+    }
 }
