@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import MarkdownIt from 'markdown-it';
 import transform from '@diplodoc/transform';
 import dd from 'ts-dedent';
@@ -253,6 +254,29 @@ describe('Directive', () => {
                 },
                 startLine: 0,
             });
+        });
+
+        it('should add handler via config', () => {
+            const md = new MarkdownIt().use(directiveParser());
+            registerLeafBlockDirective(md, {
+                name: 'blck',
+                match: ({attrs}) => Boolean(attrs?.['data-block']),
+                container: {
+                    token: 'leaf-block',
+                    tag: 'div',
+                    attrs: ({attrs}) => ({'data-block': attrs!['data-block']}),
+                    meta: ({attrs}) => ({leaf: true, data: attrs!['data-block']}),
+                },
+            });
+            const tokens = md.parse(
+                dd`
+
+
+                :: blck {data-block=2}
+                `,
+                {},
+            );
+            expect(tokens).toMatchSnapshot();
         });
     });
 

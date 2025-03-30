@@ -62,6 +62,12 @@ export type TokensDesc<P> = {
     meta?: object | ((params: P) => object);
 };
 
+export type LeafBlockDirectiveConfig = {
+    name: string;
+    match: (params: LeafBlockDirectiveParams, state: StateBlock) => boolean;
+    container: TokensDesc<LeafBlockDirectiveParams>;
+};
+
 export type ContainerDirectiveConfig = {
     name: string;
     type?: 'container_block';
