@@ -23,7 +23,10 @@ window.alert('Hello world!');
       7,
     ],
     "markup": ":::",
-    "meta": null,
+    "meta": {
+      "code": true,
+      "lang": "js",
+    },
     "nesting": 0,
     "tag": "code",
     "type": "code_js",

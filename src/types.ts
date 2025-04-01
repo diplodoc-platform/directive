@@ -55,10 +55,11 @@ export type LeafBlockDirectiveHandler = (
 ) => boolean;
 export type InlineDirectiveHandler = (state: StateInline, params: InlineDirectiveParams) => boolean;
 
-type TokensDesc<P> = {
+export type TokensDesc<P> = {
     tag: string;
     token: string;
     attrs?: DirectiveAttrs | ((params: P) => DirectiveAttrs);
+    meta?: object | ((params: P) => object);
 };
 
 export type ContainerDirectiveConfig = {
