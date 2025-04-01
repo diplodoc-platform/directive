@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.3.1](https://github.com/diplodoc-platform/directive/compare/v0.3.0...v0.3.1) (2025-04-01)
+
+
+### Bug Fixes
+
+* added ability to register leaf-block directive using config object ([#15](https://github.com/diplodoc-platform/directive/issues/15)) ([cecafd6](https://github.com/diplodoc-platform/directive/commit/cecafd6ef5cbb6067976fe6e29fa9cfbfab1871c))
+* allow to set meta to token using config objects ([#14](https://github.com/diplodoc-platform/directive/issues/14)) ([ba5595a](https://github.com/diplodoc-platform/directive/commit/ba5595a446b4709957d0336c10732b749c8ed462))
+* bumped markdown-it-directive for closing & nesting fixes ([#12](https://github.com/diplodoc-platform/directive/issues/12)) ([16dcfd8](https://github.com/diplodoc-platform/directive/commit/16dcfd8d3dd6cb11cb02c904c6ad1bd95115d852))
+
 ## [0.3.0](https://github.com/diplodoc-platform/directive/compare/v0.2.1...v0.3.0) (2024-11-27)
 
 
