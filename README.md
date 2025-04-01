@@ -127,6 +127,7 @@ All of parameters groups – `[]`, `()`, `{}` – are optional, but their order 
 - `registerLeafBlockDirective()` – register handler for new leaf block directive.
 
   ```ts
+  function registerLeafBlockDirective(md: MarkdownIt, config: LeafBlockDirectiveConfig): void;
   function registerLeafBlockDirective(
     md: MarkdownIt,
     name: string,

@@ -17,6 +17,7 @@ import type {
     DirectiveDestsOrig,
     InlineDirectiveHandler,
     InlineDirectiveParams,
+    LeafBlockDirectiveConfig,
     LeafBlockDirectiveHandler,
     LeafBlockDirectiveParams,
     MdItWithHandlers,
@@ -39,11 +40,21 @@ export function registerInlineDirective(
     };
 }
 
+export function registerLeafBlockDirective(md: MarkdownIt, config: LeafBlockDirectiveConfig): void;
 export function registerLeafBlockDirective(
     md: MarkdownIt,
     name: string,
     handler: LeafBlockDirectiveHandler,
+): void;
+export function registerLeafBlockDirective(
+    md: MarkdownIt,
+    nameOrConfig: string | LeafBlockDirectiveConfig,
+    maybeHandler?: LeafBlockDirectiveHandler,
 ): void {
+    const [name, handler]: [string, LeafBlockDirectiveHandler] = isString(nameOrConfig)
+        ? [nameOrConfig, maybeHandler!]
+        : [nameOrConfig.name, buildLeafBlockHandler(nameOrConfig)];
+
     (md as MdItWithHandlers)[LEAF_BLOCK_KEY] ||= {};
     (md as MdItWithHandlers)[LEAF_BLOCK_KEY][name] = handler;
 
@@ -93,6 +104,23 @@ function getBlockDefaultHandler(md: MarkdownIt, name: string): DirectiveBlockHan
         }
 
         return false;
+    };
+}
+
+function buildLeafBlockHandler(config: LeafBlockDirectiveConfig): LeafBlockDirectiveHandler {
+    return (state, params) => {
+        if (!config.match(params, state)) {
+            return false;
+        }
+
+        const {container} = config;
+
+        const token = state.push(container.token, container.tag, 0);
+        token.map = [params.startLine, params.endLine];
+        token.markup = '::' + config.name;
+        applyTokenFields(token, container, params);
+
+        return true;
     };
 }
 

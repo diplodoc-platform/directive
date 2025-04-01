@@ -22,8 +22,10 @@ export {
 export type {
     DirectiveAttrs,
     DirectiveDests,
+    LeafBlockDirectiveConfig,
     LeafBlockDirectiveParams,
     LeafBlockDirectiveHandler,
+    CodeContainerDirectiveConfig,
     ContainerDirectiveConfig,
     ContainerDirectiveParams,
     ContainerDirectiveHandler,
