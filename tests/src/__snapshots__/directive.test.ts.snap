@@ -985,6 +985,10 @@ exports[`Directive leaf block should add handler via config 1`] = `
         "data-block",
         "2",
       ],
+      [
+        "data-env",
+        "this is blck leaf directive",
+      ],
     ],
     "block": true,
     "children": null,
@@ -999,6 +1003,7 @@ exports[`Directive leaf block should add handler via config 1`] = `
     "markup": "::blck",
     "meta": {
       "data": "2",
+      "env": "this is blck leaf directive",
       "leaf": true,
     },
     "nesting": 0,

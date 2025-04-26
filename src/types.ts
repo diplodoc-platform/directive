@@ -7,6 +7,8 @@ import type {CONTAINER_KEY, LEAF_BLOCK_KEY} from './const';
 export type {StateBlock, StateInline};
 export type {DirectiveAttrs, DirectiveDestsOrig};
 
+export type Env = any; // eslint-disable-line @typescript-eslint/no-explicit-any
+
 export type DirectiveDests = {
     link?: string;
     string?: string;
@@ -58,8 +60,8 @@ export type InlineDirectiveHandler = (state: StateInline, params: InlineDirectiv
 export type TokensDesc<P> = {
     tag: string;
     token: string;
-    attrs?: DirectiveAttrs | ((params: P) => DirectiveAttrs);
-    meta?: object | ((params: P) => object);
+    attrs?: DirectiveAttrs | ((params: P, env: Env) => DirectiveAttrs);
+    meta?: object | ((params: P, env: Env) => object);
 };
 
 export type LeafBlockDirectiveConfig = {
