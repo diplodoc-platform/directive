@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.2](https://github.com/diplodoc-platform/directive/compare/v0.3.1...v0.3.2) (2025-04-28)
+
+
+### Bug Fixes
+
+* pass env to creators of attrs and meta in config object ([#16](https://github.com/diplodoc-platform/directive/issues/16)) ([c5f355d](https://github.com/diplodoc-platform/directive/commit/c5f355dbf861fe3f73790c62acd071a4140d0b84))
+
 ## [0.3.1](https://github.com/diplodoc-platform/directive/compare/v0.3.0...v0.3.1) (2025-04-01)
 
 
