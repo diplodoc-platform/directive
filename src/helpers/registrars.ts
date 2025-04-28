@@ -15,6 +15,7 @@ import type {
     DirectiveAttrs,
     DirectiveDests,
     DirectiveDestsOrig,
+    Env,
     InlineDirectiveHandler,
     InlineDirectiveParams,
     LeafBlockDirectiveConfig,
@@ -118,7 +119,7 @@ function buildLeafBlockHandler(config: LeafBlockDirectiveConfig): LeafBlockDirec
         const token = state.push(container.token, container.tag, 0);
         token.map = [params.startLine, params.endLine];
         token.markup = '::' + config.name;
-        applyTokenFields(token, container, params);
+        applyTokenFields(token, container, params, state.env);
 
         return true;
     };
@@ -145,11 +146,11 @@ function buildContainerHandler(config: ContainerDirectiveConfig): ContainerDirec
         let token = state.push(container.token + '_open', container.tag, 1);
         token.map = [params.startLine, params.endLine];
         token.markup = ':::' + config.name;
-        applyTokenFields(token, container, params);
+        applyTokenFields(token, container, params, state.env);
 
         if (inlineContent) {
             token = state.push(inlineContent.token + '_open', inlineContent.tag, 1);
-            applyTokenFields(token, inlineContent, params);
+            applyTokenFields(token, inlineContent, params, state.env);
 
             token = createBlockInlineToken(state, params);
 
@@ -159,7 +160,7 @@ function buildContainerHandler(config: ContainerDirectiveConfig): ContainerDirec
         if (content) {
             token = state.push(content.token + '_open', content.tag, 1);
             token.map = [params.startLine + 1, params.endLine - 1];
-            applyTokenFields(token, content, params);
+            applyTokenFields(token, content, params, state.env);
         }
 
         if (contentTokenizer) {
@@ -197,7 +198,7 @@ function buildCodeContainerHandler(
         token.content = params.content.raw;
         token.markup = ':::';
         token.info = name;
-        applyTokenFields(token, container, params);
+        applyTokenFields(token, container, params, state.env);
 
         return true;
     };
@@ -277,13 +278,14 @@ function applyTokenFields<P>(
     token: MarkdownIt.Token,
     {attrs, meta}: TokensDesc<P>,
     params: P,
+    env: Env,
 ): void {
     if (attrs !== undefined) {
-        const value: DirectiveAttrs = isFunction(attrs) ? attrs(params) : attrs;
+        const value: DirectiveAttrs = isFunction(attrs) ? attrs(params, env) : attrs;
         token.attrs = Object.entries(value);
     }
     if (meta !== undefined) {
-        const value: object = isFunction(meta) ? meta(params) : meta;
+        const value: object = isFunction(meta) ? meta(params, env) : meta;
         token.meta = value;
     }
 }

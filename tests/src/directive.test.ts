@@ -260,12 +260,22 @@ describe('Directive', () => {
             const md = new MarkdownIt().use(directiveParser());
             registerLeafBlockDirective(md, {
                 name: 'blck',
-                match: ({attrs}) => Boolean(attrs?.['data-block']),
+                match: ({attrs}, state) => {
+                    state.env.blck_env = 'this is blck leaf directive';
+                    return Boolean(attrs?.['data-block']);
+                },
                 container: {
                     token: 'leaf-block',
                     tag: 'div',
-                    attrs: ({attrs}) => ({'data-block': attrs!['data-block']}),
-                    meta: ({attrs}) => ({leaf: true, data: attrs!['data-block']}),
+                    attrs: ({attrs}, env) => ({
+                        'data-block': attrs!['data-block'],
+                        'data-env': env.blck_env,
+                    }),
+                    meta: ({attrs}, env) => ({
+                        leaf: true,
+                        data: attrs!['data-block'],
+                        env: env.blck_env,
+                    }),
                 },
             });
             const tokens = md.parse(
