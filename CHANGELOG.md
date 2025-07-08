@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.3](https://github.com/diplodoc-platform/directive/compare/v0.3.2...v0.3.3) (2025-07-08)
+
+
+### Bug Fixes
+
+* **block:** fix lheading at first content line breaks directive ([#18](https://github.com/diplodoc-platform/directive/issues/18)) ([85283dc](https://github.com/diplodoc-platform/directive/commit/85283dc8352019ab53fff09afa6875f01f3af9ac))
+
 ## [0.3.2](https://github.com/diplodoc-platform/directive/compare/v0.3.1...v0.3.2) (2025-04-28)
 
 
