@@ -449,6 +449,54 @@ describe('Directive', () => {
             );
             expect(tokens).toMatchSnapshot();
         });
+
+        it('should parse directive with "-" at first content line', () => {
+            const handler = jest.fn(() => false);
+            html(
+                dd`
+                :::block
+                -
+                :::
+                `,
+                {plugins: [(md) => registerContainerDirective(md, 'block', handler)]},
+            );
+
+            expect(handler).toHaveBeenCalledTimes(1);
+            // @ts-expect-error
+            expect(handler.mock.calls[0][1]).toStrictEqual({
+                content: {
+                    endLine: 2,
+                    raw: '-\n',
+                    startLine: 1,
+                },
+                endLine: 3,
+                startLine: 0,
+            });
+        });
+
+        it('should parse directive with "=" at first content line', () => {
+            const handler = jest.fn(() => false);
+            html(
+                dd`
+                :::block
+                =
+                :::
+                `,
+                {plugins: [(md) => registerContainerDirective(md, 'block', handler)]},
+            );
+
+            expect(handler).toHaveBeenCalledTimes(1);
+            // @ts-expect-error
+            expect(handler.mock.calls[0][1]).toStrictEqual({
+                content: {
+                    endLine: 2,
+                    raw: '=\n',
+                    startLine: 1,
+                },
+                endLine: 3,
+                startLine: 0,
+            });
+        });
     });
 
     describe('helpers', () => {
