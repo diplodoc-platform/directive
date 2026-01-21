@@ -1,12 +1,14 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import MarkdownIt from 'markdown-it';
+
+import type MarkdownIt from 'markdown-it';
+import type {ContainerDirectiveParams, InlineDirectiveParams, LeafBlockDirectiveParams} from '..';
+
+import MarkdownItImpl from 'markdown-it';
 import transform from '@diplodoc/transform';
+import {describe, expect, it, vi} from 'vitest';
 import dd from 'ts-dedent';
 
 import {
-    type ContainerDirectiveParams,
-    type InlineDirectiveParams,
-    type LeafBlockDirectiveParams,
     createBlockInlineToken,
     directiveParser,
     disableBlockDirectives,
@@ -16,7 +18,7 @@ import {
     registerLeafBlockDirective,
     tokenizeBlockContent,
     tokenizeInlineContent,
-} from '../../src';
+} from '..';
 
 const html = (text: string, {plugins}: {plugins?: MarkdownIt.PluginSimple[]} = {}) => {
     const {result} = transform(text, {
@@ -28,10 +30,10 @@ const html = (text: string, {plugins}: {plugins?: MarkdownIt.PluginSimple[]} = {
 
 describe('Directive', () => {
     it.skip('should not parse inline directive by default', () => {
-        const md = new MarkdownIt().use(directiveParser());
-        const inlineHandler = jest.fn(() => false);
-        const leafHandler = jest.fn(() => false);
-        const blockHandler = jest.fn(() => false);
+        const md = new MarkdownItImpl().use(directiveParser());
+        const inlineHandler = vi.fn(() => false);
+        const leafHandler = vi.fn(() => false);
+        const blockHandler = vi.fn(() => false);
         registerInlineDirective(md, 'inl', inlineHandler);
         registerLeafBlockDirective(md, 'leaf', leafHandler);
         registerContainerDirective(md, 'blck', blockHandler);
@@ -54,7 +56,7 @@ describe('Directive', () => {
 
     describe('inline', () => {
         it('should call handler when parse inline directive', () => {
-            const handler = jest.fn(() => false);
+            const handler = vi.fn(() => false);
             html('text before :abcdef[](){} text after', {
                 plugins: [(md) => registerInlineDirective(md, 'abcdef', handler)],
             });
@@ -62,7 +64,7 @@ describe('Directive', () => {
         });
 
         it('should call inline handler and pass two arguments', () => {
-            const handler = jest.fn(() => false);
+            const handler = vi.fn(() => false);
             html('text before :abcdef[](){} text after', {
                 plugins: [(md) => registerInlineDirective(md, 'abcdef', handler)],
             });
@@ -70,7 +72,7 @@ describe('Directive', () => {
         });
 
         it('should call inline handler and pass right directive params', () => {
-            const handler = jest.fn(() => false);
+            const handler = vi.fn(() => false);
             html('text before :abcdef[](){} text after', {
                 plugins: [(md) => registerInlineDirective(md, 'abcdef', handler)],
             });
@@ -89,7 +91,7 @@ describe('Directive', () => {
         });
 
         it('should parse inline content, dests and attrs in inline directive', () => {
-            const handler = jest.fn(() => false);
+            const handler = vi.fn(() => false);
             html(
                 'text before :dir["inline _content_"](path/to/smth "text" "test2" id-of-smth){abc=def flag=true attr="value"} text after',
                 {plugins: [(md) => registerInlineDirective(md, 'dir', handler)]},
@@ -99,7 +101,7 @@ describe('Directive', () => {
         });
 
         it('should not parse attrs in inline directive', () => {
-            const handler = jest.fn(() => false);
+            const handler = vi.fn(() => false);
             html('text before :dir[](){attr} text after', {
                 plugins: [(md) => registerInlineDirective(md, 'dir', handler)],
             });
@@ -118,7 +120,7 @@ describe('Directive', () => {
         });
 
         it('should parse inline directive without parameters', () => {
-            const handler = jest.fn(() => false);
+            const handler = vi.fn(() => false);
             html('text before :dir text after', {
                 plugins: [(md) => registerInlineDirective(md, 'dir', handler)],
             });
@@ -130,13 +132,13 @@ describe('Directive', () => {
         });
 
         it('should parse inline directive in text without separators', () => {
-            const handler = jest.fn(() => false);
+            const handler = vi.fn(() => false);
             html('before:dir', {plugins: [(md) => registerInlineDirective(md, 'dir', handler)]});
             expect(handler).toHaveBeenCalled();
         });
 
         it('should not throw error when parsing something like inline directive and reference link', () => {
-            /* 
+            /*
                 Caught a bug that if there is something similar to an inline directive and a reference link,
                 it will be considered an inline directive and will fail during parsing
                 https://github.com/hilookas/markdown-it-directive/blob/master/index.js#L224
@@ -148,13 +150,13 @@ describe('Directive', () => {
 
                 [xx]: bb.com
             `;
-            const fn = jest.fn(() => {
+            const fn = vi.fn(() => {
                 html(markup);
             });
             try {
                 fn();
-            } catch (err) {
-                // console.error(err);
+            } catch {
+                // ignore
             }
             expect(fn).not.toThrow();
         });
@@ -165,12 +167,14 @@ describe('Directive', () => {
 
                 [xx]: bb.com
             `;
-            const fn = jest.fn(() => {
+            const fn = vi.fn(() => {
                 html(markup, {plugins: [(md) => disableInlineDirectives(md)]});
             });
             try {
                 fn();
-            } catch (e) {}
+            } catch {
+                // ignore
+            }
             expect(fn).not.toThrow();
         });
 
@@ -226,7 +230,7 @@ describe('Directive', () => {
 
     describe('leaf block', () => {
         it('should parse directive without parameters', () => {
-            const handler = jest.fn(() => false);
+            const handler = vi.fn(() => false);
             html('::leaf', {plugins: [(md) => registerLeafBlockDirective(md, 'leaf', handler)]});
             expect(handler).toHaveBeenCalledTimes(1);
             // @ts-expect-error
@@ -237,7 +241,7 @@ describe('Directive', () => {
         });
 
         it('should parse directive with empty parameters', () => {
-            const handler = jest.fn(() => false);
+            const handler = vi.fn(() => false);
             html('::leaf[](){}', {
                 plugins: [(md) => registerLeafBlockDirective(md, 'leaf', handler)],
             });
@@ -257,7 +261,7 @@ describe('Directive', () => {
         });
 
         it('should add handler via config', () => {
-            const md = new MarkdownIt().use(directiveParser());
+            const md = new MarkdownItImpl().use(directiveParser());
             registerLeafBlockDirective(md, {
                 name: 'blck',
                 match: ({attrs}, state) => {
@@ -292,7 +296,7 @@ describe('Directive', () => {
 
     describe('block with content', () => {
         it('should parse directive without parameters', () => {
-            const handler = jest.fn(() => false);
+            const handler = vi.fn(() => false);
             html(
                 dd`
                 :::block
@@ -315,7 +319,7 @@ describe('Directive', () => {
         });
 
         it('should parse directive with empty parameters', () => {
-            const handler = jest.fn(() => false);
+            const handler = vi.fn(() => false);
             html(
                 dd`
                 :::block[](){}
@@ -345,7 +349,7 @@ describe('Directive', () => {
         });
 
         it('should pass raw content', () => {
-            const handler = jest.fn(() => false);
+            const handler = vi.fn(() => false);
             html(
                 dd`
                 :::dir
@@ -367,7 +371,7 @@ describe('Directive', () => {
         });
 
         it('should not not handle inner directive', () => {
-            const handler = jest.fn(() => false);
+            const handler = vi.fn(() => false);
             html(
                 dd`
                 :::dir
@@ -397,7 +401,7 @@ describe('Directive', () => {
         });
 
         it('should ignore second closing markup', () => {
-            const handler = jest.fn(() => false);
+            const handler = vi.fn(() => false);
             html(
                 dd`
                 :::test
@@ -410,7 +414,7 @@ describe('Directive', () => {
             );
             expect(handler).toHaveBeenCalledTimes(1);
             // @ts-expect-error
-            const params: BlockDirectiveParams = handler.mock.calls[0][1];
+            const params: ContainerDirectiveParams = handler.mock.calls[0][1];
             expect(params).toStrictEqual({
                 content: {
                     endLine: 2,
@@ -423,7 +427,7 @@ describe('Directive', () => {
         });
 
         it('should add code container handler via config', () => {
-            const md = new MarkdownIt().use(directiveParser());
+            const md = new MarkdownItImpl().use(directiveParser());
             registerContainerDirective(md, {
                 name: 'js',
                 type: 'code_block',
@@ -451,7 +455,7 @@ describe('Directive', () => {
         });
 
         it('should parse directive with "-" at first content line', () => {
-            const handler = jest.fn(() => false);
+            const handler = vi.fn(() => false);
             html(
                 dd`
                 :::block
@@ -475,7 +479,7 @@ describe('Directive', () => {
         });
 
         it('should parse directive with "=" at first content line', () => {
-            const handler = jest.fn(() => false);
+            const handler = vi.fn(() => false);
             html(
                 dd`
                 :::block
@@ -502,9 +506,9 @@ describe('Directive', () => {
     describe('helpers', () => {
         describe('disableBlockDirectives and disableBlockDirectives', () => {
             it('should ignore inline directives', () => {
-                const inlineHandler = jest.fn(() => false);
-                const leafHandler = jest.fn(() => false);
-                const blockHandler = jest.fn(() => false);
+                const inlineHandler = vi.fn(() => false);
+                const leafHandler = vi.fn(() => false);
+                const blockHandler = vi.fn(() => false);
                 html(
                     dd`
                     :inline
@@ -532,9 +536,9 @@ describe('Directive', () => {
             });
 
             it('should ignore block directives', () => {
-                const inlineHandler = jest.fn(() => false);
-                const leafHandler = jest.fn(() => false);
-                const blockHandler = jest.fn(() => false);
+                const inlineHandler = vi.fn(() => false);
+                const leafHandler = vi.fn(() => false);
+                const blockHandler = vi.fn(() => false);
                 html(
                     dd`
                     :inline
@@ -564,7 +568,7 @@ describe('Directive', () => {
 
         describe('tokenizeBlockContent', () => {
             it('should parse nested directive', () => {
-                const md = new MarkdownIt().use(directiveParser());
+                const md = new MarkdownItImpl().use(directiveParser());
                 registerContainerDirective(md, 'test', (state, {content}) => {
                     if (content) {
                         tokenizeBlockContent(state, content);
@@ -600,7 +604,7 @@ describe('Directive', () => {
 
         describe('tokenizeInlineContent', () => {
             it('should parse content in inline directive', () => {
-                const md = new MarkdownIt().use(directiveParser());
+                const md = new MarkdownItImpl().use(directiveParser());
                 registerInlineDirective(md, 'inl', (state, params) => {
                     if (!params.content) {
                         return false;
@@ -624,7 +628,7 @@ describe('Directive', () => {
 
         describe('createBlockInlineToken', () => {
             it('should parse inline content in block diagram', () => {
-                const md = new MarkdownIt().use(directiveParser());
+                const md = new MarkdownItImpl().use(directiveParser());
                 registerLeafBlockDirective(md, 'blck', (state, params) => {
                     if (!params.inlineContent) {
                         return false;
