@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 import type MarkdownIt from 'markdown-it';
-import type {ContainerDirectiveParams, InlineDirectiveParams, LeafBlockDirectiveParams} from '..';
+import type {ContainerDirectiveParams, InlineDirectiveParams, LeafBlockDirectiveParams} from '@diplodoc/directive';
 
 import MarkdownItImpl from 'markdown-it';
 import transform from '@diplodoc/transform';
@@ -18,7 +18,7 @@ import {
     registerLeafBlockDirective,
     tokenizeBlockContent,
     tokenizeInlineContent,
-} from '..';
+} from '@diplodoc/directive';
 
 const html = (text: string, {plugins}: {plugins?: MarkdownIt.PluginSimple[]} = {}) => {
     const {result} = transform(text, {

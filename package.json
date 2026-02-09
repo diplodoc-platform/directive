@@ -22,8 +22,8 @@
     "build:clean": "node scripts/clean.mjs",
     "build:js": "node esbuild/build.mjs",
     "build:declarations": "tsc -p tsconfig.publish.json --emitDeclarationOnly --outDir ./build",
-    "test": "vitest run src --config vitest.config.mjs",
-    "test:watch": "vitest src --config vitest.config.mjs",
+    "test": "cd tests && npm install && npx vitest run --config ../vitest.config.mjs",
+    "test:watch": "cd tests && npx vitest --config ../vitest.config.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "prepublishOnly": "npm run lint && npm run test && npm run build",
     "lint": "lint update && lint",
@@ -36,16 +36,12 @@
   },
   "devDependencies": {
     "@diplodoc/lint": "^1.9.2",
-    "@diplodoc/transform": "^4.34.0",
     "@diplodoc/tsconfig": "^1.0.2",
     "@types/markdown-it": "^13.0.9",
     "@types/node": "^22.19.7",
     "esbuild": "^0.27.2",
-    "jsdom": "^27.4.0",
     "markdown-it": "^13.0.2",
     "npm-run-all": "^4.1.5",
-    "ts-dedent": "^2.2.0",
-    "typescript": "^5.6.3",
-    "vitest": "^3.2.4"
+    "typescript": "^5.6.3"
   }
 }

@@ -1,0 +1,22 @@
+{
+  "name": "@diplodoc/directive-tests",
+  "private": true,
+  "scripts": {
+    "test": "vitest run --config ../vitest.config.mjs",
+    "test:watch": "vitest --config ../vitest.config.mjs"
+  },
+  "dependencies": {
+    "@diplodoc/directive": "file:..",
+    "@diplodoc/transform": "^4.34.0",
+    "markdown-it": "^13.0.2"
+  },
+  "devDependencies": {
+    "@diplodoc/tsconfig": "^1.0.2",
+    "@types/markdown-it": "^13.0.9",
+    "@types/node": "^22.19.7",
+    "jsdom": "^27.4.0",
+    "ts-dedent": "^2.2.0",
+    "typescript": "^5.6.3",
+    "vitest": "^3.2.4"
+  }
+}

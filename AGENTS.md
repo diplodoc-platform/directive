@@ -23,6 +23,8 @@ Primary exports:
 - `build/` — build output (generated, published)
 - `esbuild/` — bundling configuration (Node target)
 - `scripts/` — maintenance scripts (cross-platform)
+- `tests/` — test suite with its own `package.json`; depends on `@diplodoc/transform` (see [ADR-001](adr/ADR-001-tests-isolation-for-nx-acyclicity.md))
+- `adr/` — architecture decision records
 
 ## Development commands
 
