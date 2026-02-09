@@ -23,6 +23,8 @@ Primary exports:
 - `build/` — build output (generated, published)
 - `esbuild/` — bundling configuration (Node target)
 - `scripts/` — maintenance scripts (cross-platform)
+- `tests/` — test suite
+- `adr/` — architecture decision records
 
 ## Development commands
 

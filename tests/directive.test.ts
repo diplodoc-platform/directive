@@ -1,10 +1,14 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 import type MarkdownIt from 'markdown-it';
-import type {ContainerDirectiveParams, InlineDirectiveParams, LeafBlockDirectiveParams} from '..';
+import type {
+    ContainerDirectiveParams,
+    InlineDirectiveParams,
+    LeafBlockDirectiveParams,
+} from '@diplodoc/directive';
 
 import MarkdownItImpl from 'markdown-it';
-import transform from '@diplodoc/transform';
+import markdownItAttrs from 'markdown-it-attrs';
 import {describe, expect, it, vi} from 'vitest';
 import dd from 'ts-dedent';
 
@@ -18,14 +22,14 @@ import {
     registerLeafBlockDirective,
     tokenizeBlockContent,
     tokenizeInlineContent,
-} from '..';
+} from '@diplodoc/directive';
 
 const html = (text: string, {plugins}: {plugins?: MarkdownIt.PluginSimple[]} = {}) => {
-    const {result} = transform(text, {
-        plugins: [directiveParser(), ...(plugins || [])],
-    });
-
-    return result.html;
+    const md = new MarkdownItImpl().use(directiveParser());
+    for (const plugin of plugins ?? []) {
+        md.use(plugin);
+    }
+    return md.render(text);
 };
 
 describe('Directive', () => {
@@ -181,6 +185,7 @@ describe('Directive', () => {
         it('markdown-it-attrs should add attributes to em content inside content of inline directive', () => {
             const res = html('para :inl[aa _bb_{.dd} cc] after', {
                 plugins: [
+                    (md) => md.use(markdownItAttrs),
                     (md) => {
                         registerInlineDirective(md, 'inl', (state, params) => {
                             if (!params.content) {
@@ -204,6 +209,7 @@ describe('Directive', () => {
         it('markdown-it-attrs should add attributes to inline directive', () => {
             const res = html('para :inl[]{label=first}{#second} after', {
                 plugins: [
+                    (md) => md.use(markdownItAttrs),
                     (md) => {
                         registerInlineDirective(md, 'inl', (state, params) => {
                             if (params.content === undefined) {
