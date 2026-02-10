@@ -1,6 +1,11 @@
 # Directive syntax parser
 
 [![NPM version](https://img.shields.io/npm/v/@diplodoc/directive.svg?style=flat)](https://www.npmjs.org/package/@diplodoc/directive)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=diplodoc-platform_directive&metric=alert_status)](https://sonarcloud.io/summary/overall?id=diplodoc-platform_directive)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=diplodoc-platform_directive&metric=coverage)](https://sonarcloud.io/summary/overall?id=diplodoc-platform_directive)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=diplodoc-platform_directive&metric=sqale_rating)](https://sonarcloud.io/summary/overall?id=diplodoc-platform_directive)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=diplodoc-platform_directive&metric=reliability_rating)](https://sonarcloud.io/summary/overall?id=diplodoc-platform_directive)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=diplodoc-platform_directive&metric=security_rating)](https://sonarcloud.io/summary/overall?id=diplodoc-platform_directive)
 
 This is a pluggable parser for directive syntax for markdown markup. With it you can easily add implementation for a new block in you markdown project.
 
