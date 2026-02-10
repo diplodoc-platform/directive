@@ -1,13 +1,16 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 import type MarkdownIt from 'markdown-it';
-import type {ContainerDirectiveParams, InlineDirectiveParams, LeafBlockDirectiveParams} from '@diplodoc/directive';
+import type {
+    ContainerDirectiveParams,
+    InlineDirectiveParams,
+    LeafBlockDirectiveParams,
+} from '@diplodoc/directive';
 
 import MarkdownItImpl from 'markdown-it';
 import transform from '@diplodoc/transform';
 import {describe, expect, it, vi} from 'vitest';
 import dd from 'ts-dedent';
-
 import {
     createBlockInlineToken,
     directiveParser,
