@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.3.4](https://github.com/diplodoc-platform/directive/compare/v0.3.3...v0.3.4) (2026-05-28)
+
+
+### Bug Fixes
+
+* **deps:** updated node to 24 ([#32](https://github.com/diplodoc-platform/directive/issues/32)) ([8094bce](https://github.com/diplodoc-platform/directive/commit/8094bce8f25e0ce12ca9058f913fd57125267425))
+* **directive:** add jsdom for Vitest jsdom environment ([5980c36](https://github.com/diplodoc-platform/directive/commit/5980c362aa486728f9d49fe58ab26fcea7aded4a))
+* Update infra to v1.13.2 ([611fc7b](https://github.com/diplodoc-platform/directive/commit/611fc7ba07726d14ae4eedc4c09fead57d3c3337))
+* update version actions, node 22 ([38fec9c](https://github.com/diplodoc-platform/directive/commit/38fec9ca7dbcd9b085b67b325ca78fc2bb853945))
+
 ## [0.3.3](https://github.com/diplodoc-platform/directive/compare/v0.3.2...v0.3.3) (2025-07-08)
 
 
