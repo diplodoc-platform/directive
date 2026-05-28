@@ -47,6 +47,7 @@
     "vitest": "^3.2.4"
   },
   "dependencies": {
+    "@diplodoc/cut-extension": "^1.1.2",
     "@diplodoc/file-extension": "^0.2.3",
     "markdown-it-directive": "^2.0.6"
   }
