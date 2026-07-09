@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.5](https://github.com/diplodoc-platform/directive/compare/v0.3.4...v0.3.5) (2026-07-03)
+
+
+### Bug Fixes
+
+* **deps:** Update @diplodoc/file-extension@0.2.3 ([#36](https://github.com/diplodoc-platform/directive/issues/36)) ([83810e5](https://github.com/diplodoc-platform/directive/commit/83810e58f56e098472a002f88bf591b3fe2eafcc))
+
 ## [0.3.4](https://github.com/diplodoc-platform/directive/compare/v0.3.3...v0.3.4) (2026-05-28)
 
 
