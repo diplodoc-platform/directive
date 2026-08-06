@@ -4,7 +4,10 @@
     "target": "es2022",
     "module": "es2022",
     "declaration": true,
-    "paths": {"@diplodoc/directive": ["./src"]}
+    "paths": {
+      "@diplodoc/directive": ["./src"]
+    },
+    "moduleResolution": "bundler"
   },
   "include": ["src", "tests"],
   "exclude": ["node_modules", "build"]
