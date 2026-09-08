@@ -301,6 +301,35 @@ describe('Directive', () => {
     });
 
     describe('block with content', () => {
+        it('should expose a bare content title and its source positions', () => {
+            const handler = vi.fn(() => false);
+            html(
+                dd`
+                :::visibility agents
+                content
+                :::
+                `,
+                {plugins: [(md) => registerContainerDirective(md, 'visibility', handler)]},
+            );
+
+            expect(handler).toHaveBeenCalledTimes(1);
+            // @ts-expect-error
+            expect(handler.mock.calls[0][1]).toStrictEqual<ContainerDirectiveParams>({
+                content: {
+                    endLine: 2,
+                    raw: 'content\n',
+                    startLine: 1,
+                },
+                contentTitle: {
+                    endPos: 20,
+                    raw: 'agents',
+                    startPos: 14,
+                },
+                endLine: 3,
+                startLine: 0,
+            });
+        });
+
         it('should parse directive without parameters', () => {
             const handler = vi.fn(() => false);
             html(

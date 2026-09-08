@@ -33,6 +33,7 @@ export type LeafBlockDirectiveParams = {
     attrs?: DirectiveAttrs;
     dests?: DirectiveDests;
     inlineContent?: InlineContent;
+    contentTitle?: InlineContent;
 };
 
 export type ContainerDirectiveParams = LeafBlockDirectiveParams & {
