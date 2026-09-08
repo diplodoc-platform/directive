@@ -243,6 +243,13 @@ function buildLeafBlockParams(args: DirectiveBlockHandlerArgs): LeafBlockDirecti
             endPos: args.inlineContentEnd!,
         };
     }
+    if (args.contentTitle) {
+        params.contentTitle = {
+            raw: args.contentTitle,
+            startPos: args.contentTitleStart!,
+            endPos: args.contentTitleEnd!,
+        };
+    }
     return params;
 }
 
