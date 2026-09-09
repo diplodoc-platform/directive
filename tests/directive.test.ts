@@ -305,7 +305,7 @@ describe('Directive', () => {
             const handler = vi.fn(() => false);
             html(
                 dd`
-                :::visibility agents
+                :::visibility agent
                 content
                 :::
                 `,
@@ -321,8 +321,8 @@ describe('Directive', () => {
                     startLine: 1,
                 },
                 contentTitle: {
-                    endPos: 20,
-                    raw: 'agents',
+                    endPos: 19,
+                    raw: 'agent',
                     startPos: 14,
                 },
                 endLine: 3,
