@@ -330,6 +330,48 @@ describe('Directive', () => {
             });
         });
 
+        it('should limit bare content title parsing to the opening line', () => {
+            const handler = vi.fn(() => false);
+            html(
+                dd`
+                :::visibility agent
+                Content with an unmatched bracket :-]
+                :::
+                `,
+                {plugins: [(md) => registerContainerDirective(md, 'visibility', handler)]},
+            );
+
+            expect(handler).toHaveBeenCalledTimes(1);
+            // @ts-expect-error
+            expect(handler.mock.calls[0][1]).toMatchObject<ContainerDirectiveParams>({
+                contentTitle: {
+                    endPos: 19,
+                    raw: 'agent',
+                    startPos: 14,
+                },
+            });
+        });
+
+        it('should not finish an opening-line label on a later line', () => {
+            const handler = vi.fn(() => false);
+            html(
+                dd`
+                :::visibility [agent
+                Later label end]
+                :::
+                `,
+                {plugins: [(md) => registerContainerDirective(md, 'visibility', handler)]},
+            );
+
+            expect(handler).toHaveBeenCalledTimes(1);
+            // @ts-expect-error
+            expect(handler.mock.calls[0][1]).toMatchObject({
+                contentTitle: {
+                    raw: '[agent',
+                },
+            });
+        });
+
         it('should parse directive without parameters', () => {
             const handler = vi.fn(() => false);
             html(
