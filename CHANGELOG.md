@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.4.0](https://github.com/diplodoc-platform/directive/compare/v0.3.6...v0.4.0) (2026-09-15)
+
+
+### Features
+
+* expose block directive content titles DOCSTOOLS-6553 ([e2da04e](https://github.com/diplodoc-platform/directive/commit/e2da04e77484a0877cb7ce62d70d6abd1d25d3a2))
+
+
+### Bug Fixes
+
+* bound block directive label parsing DOCSTOOLS-6553 ([bd7f974](https://github.com/diplodoc-platform/directive/commit/bd7f974e2e670364ecbf303a326ba799a269292d))
+
 ## [0.3.6](https://github.com/diplodoc-platform/directive/compare/v0.3.5...v0.3.6) (2026-08-06)
 
 
