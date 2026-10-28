@@ -21,34 +21,44 @@ enableBlockDirectives(md);
 disableInlineDirectives(md);
 enableInlineDirectives(md);
 
-registerContainerDirective(md, 'box', (state, params) => {
-    const nativeState: Parameters<Parameters<typeof md.block.ruler.push>[1]>[0] = state;
-    const nativeTokenize = () =>
-        state.md.block.tokenize(state, params.content.startLine, params.content.endLine);
-    const line: number = state.line;
-    const source: string = state.src;
-    // @ts-expect-error Block state positions retain native numeric types.
-    const invalidLine: string = state.line;
-    // @ts-expect-error Parameter positions retain numeric types.
-    const invalidStart: string = params.startLine;
-    const token = state.push('box_open', 'section', 1);
-    token.map = [params.startLine, params.endLine];
-    const nativeToken: ReturnType<typeof md.parse>[number] = token;
-    // @ts-expect-error Native token content remains a string.
-    const invalidContent: number = token.content;
-    tokenizeBlockContent(state, params.content);
-    state.push('box_close', 'section', -1);
-    return Array.isArray([
-        line,
-        source,
-        invalidLine,
-        invalidStart,
-        nativeToken,
-        invalidContent,
-        nativeState,
-        nativeTokenize,
-    ]);
-});
+registerContainerDirective(
+    md,
+    'box',
+    (state, params) => {
+        const parsedValue: string | string[] | undefined = params.attrs?.example;
+        // @ts-expect-error Repeated parsed values must be narrowed before use as a scalar.
+        const scalarValue: string = params.attrs?.example;
+        const nativeState: Parameters<Parameters<typeof md.block.ruler.push>[1]>[0] = state;
+        const nativeTokenize = () =>
+            state.md.block.tokenize(state, params.content.startLine, params.content.endLine);
+        const line: number = state.line;
+        const source: string = state.src;
+        // @ts-expect-error Block state positions retain native numeric types.
+        const invalidLine: string = state.line;
+        // @ts-expect-error Parameter positions retain numeric types.
+        const invalidStart: string = params.startLine;
+        const token = state.push('box_open', 'section', 1);
+        token.map = [params.startLine, params.endLine];
+        const nativeToken: ReturnType<typeof md.parse>[number] = token;
+        // @ts-expect-error Native token content remains a string.
+        const invalidContent: number = token.content;
+        tokenizeBlockContent(state, params.content);
+        state.push('box_close', 'section', -1);
+        return Array.isArray([
+            parsedValue,
+            scalarValue,
+            line,
+            source,
+            invalidLine,
+            invalidStart,
+            nativeToken,
+            invalidContent,
+            nativeState,
+            nativeTokenize,
+        ]);
+    },
+    {onConflict: 'error'},
+);
 
 registerContainerDirective(md, {
     name: 'configured',

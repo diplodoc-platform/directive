@@ -1,6 +1,6 @@
 import type {MarkdownIt, StateBlock, StateInline} from './markdown-it';
 
-export type DirectiveAttrs = Record<string, string>;
+export type DirectiveAttrs = Record<string, string | string[]>;
 export type DirectiveDests = ['link' | 'string', string][];
 
 export type DirectiveInlineHandlerArgs = {

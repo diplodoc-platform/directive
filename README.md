@@ -144,7 +144,7 @@ All of parameters groups – `[]`, `()`, `{}` – are optional, but their order 
 
 - `[]` – used for something like inline-content;
 - `()` – used for something like required identifier (id, url, etc.);
-- `{}` – used to pass optional named arguments / attributes / `key=value` pairs.
+- `{}` – used to pass optional named arguments / attributes / `key=value` pairs. Parsed values are strings, or arrays of strings when the same key occurs more than once.
 
 ## Helpers
 
@@ -191,8 +191,11 @@ All of parameters groups – `[]`, `()`, `{}` – are optional, but their order 
     md: MarkdownIt,
     name: string,
     handler: ContainerDirectiveHandler,
+    options?: {onConflict?: 'replace' | 'error'},
   ): void;
   ```
+
+Container registrations replace an existing block directive with the same name by default. Pass `{onConflict: 'error'}` as the final argument, or set `onConflict: 'error'` in the configuration object, to reject a collision before changing the existing registration.
 
 ### Tokenizers
 

@@ -12,7 +12,6 @@ import type {
     ContainerDirectiveConfig,
     ContainerDirectiveHandler,
     ContainerDirectiveParams,
-    DirectiveAttrs,
     DirectiveDests,
     DirectiveDestsOrig,
     Env,
@@ -70,11 +69,13 @@ export function registerContainerDirective(
     md: MarkdownIt,
     name: string,
     handler: ContainerDirectiveHandler,
+    options?: {onConflict?: 'replace' | 'error'},
 ): void;
 export function registerContainerDirective(
     md: MarkdownIt,
     nameOrConfig: string | ContainerDirectiveConfig | CodeContainerDirectiveConfig,
     maybeHandler?: ContainerDirectiveHandler,
+    options?: {onConflict?: 'replace' | 'error'},
 ): void {
     const [name, handler]: [string, ContainerDirectiveHandler] = isString(nameOrConfig)
         ? [nameOrConfig, maybeHandler!]
@@ -84,6 +85,12 @@ export function registerContainerDirective(
                   ? buildCodeContainerHandler(nameOrConfig)
                   : buildContainerHandler(nameOrConfig),
           ];
+
+    const onConflict = isString(nameOrConfig) ? options?.onConflict : nameOrConfig.onConflict;
+    const directives = (md as MarkdownItWithDirectives).blockDirectives;
+    if (onConflict === 'error' && Object.prototype.hasOwnProperty.call(directives, name)) {
+        throw new Error(`Block directive already registered: ${name}`);
+    }
 
     (md as MdItWithHandlers)[CONTAINER_KEY] ||= {};
     (md as MdItWithHandlers)[CONTAINER_KEY][name] = handler;
@@ -288,7 +295,7 @@ function applyTokenFields<P>(
     env: Env,
 ): void {
     if (attrs !== undefined) {
-        const value: DirectiveAttrs = isFunction(attrs) ? attrs(params, env) : attrs;
+        const value: Record<string, string> = isFunction(attrs) ? attrs(params, env) : attrs;
         token.attrs = Object.entries(value);
     }
     if (meta !== undefined) {

@@ -59,7 +59,7 @@ export type InlineDirectiveHandler = (state: StateInline, params: InlineDirectiv
 export type TokensDesc<P> = {
     tag: string;
     token: string;
-    attrs?: DirectiveAttrs | ((params: P, env: Env) => DirectiveAttrs);
+    attrs?: Record<string, string> | ((params: P, env: Env) => Record<string, string>);
     meta?: object | ((params: P, env: Env) => object);
 };
 
@@ -71,6 +71,7 @@ export type LeafBlockDirectiveConfig = {
 
 export type ContainerDirectiveConfig = {
     name: string;
+    onConflict?: 'replace' | 'error';
     type?: 'container_block';
     match: (params: ContainerDirectiveParams, state: StateBlock) => boolean;
     container: TokensDesc<ContainerDirectiveParams>;
@@ -89,6 +90,7 @@ export type ContainerDirectiveConfig = {
 
 export type CodeContainerDirectiveConfig = {
     name: string;
+    onConflict?: 'replace' | 'error';
     type: 'code_block';
     match: (params: ContainerDirectiveParams, state: StateBlock) => boolean;
     container: TokensDesc<ContainerDirectiveParams>;

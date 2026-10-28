@@ -120,6 +120,11 @@ for (const host of matrix) {
     writeFileSync(join(dir, 'consumer.cts'), cjs);
     copyFileSync(join(fixture, 'tsconfig.json'), join(dir, 'tsconfig.json'));
     copyFileSync(join(root, 'tests', 'block-boundary.test.ts'), join(dir, 'boundary.test.ts'));
+    const validation = readFileSync(join(root, 'tests', 'attribute-validation.test.ts'), 'utf8');
+    writeFileSync(
+        join(dir, 'attribute-validation.test.ts'),
+        validation.replace("from '../src'", "from '@diplodoc/directive'"),
+    );
 
     npm(
         ['install', '--no-workspaces', '--no-audit', '--no-fund'],
