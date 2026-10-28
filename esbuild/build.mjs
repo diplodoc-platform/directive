@@ -18,7 +18,8 @@ execFileSync(process.execPath, [require.resolve('patch-package'), '--error-on-fa
     stdio: 'inherit',
 });
 const upstream = require.resolve('markdown-it-directive');
-const upstreamHash = createHash('sha256').update(readFileSync(upstream)).digest('hex');
+const upstreamSource = readFileSync(upstream, 'utf8').replace(/\r\n/g, '\n');
+const upstreamHash = createHash('sha256').update(upstreamSource).digest('hex');
 if (upstreamHash !== '71aa399a9846c7d98031437a76e80e89bcaf34c08abead27a1a0e4b3224c6638') {
     throw new Error('Unexpected markdown-it-directive source after patching');
 }
