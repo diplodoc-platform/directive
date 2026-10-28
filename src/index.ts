@@ -1,6 +1,4 @@
-import type MarkdownIt from 'markdown-it';
-import type ParserBlock from 'markdown-it/lib/parser_block';
-import type StateInline from 'markdown-it/lib/rules_inline/state_inline';
+import type {BlockRule, MarkdownIt, PluginSimple, StateInline} from './markdown-it';
 
 import directivePlugin from 'markdown-it-directive';
 
@@ -30,7 +28,7 @@ function constrainBlockDirectiveLabels(md: MarkdownIt): void {
         return;
     }
 
-    const ruler = md.block.ruler as unknown as RulerWithRules<ParserBlock.RuleBlock>;
+    const ruler = md.block.ruler as unknown as RulerWithRules<BlockRule>;
     const rule = ruler.__rules__.find(({name}) => name === 'block_directive');
 
     if (!rule) {
@@ -100,7 +98,7 @@ export type {
     InlineDirectiveHandler,
 } from './types';
 
-export const directiveParser = (): MarkdownIt.PluginSimple => {
+export const directiveParser = (): PluginSimple => {
     return (md) => {
         directivePlugin(md);
         constrainBlockDirectiveLabels(md);

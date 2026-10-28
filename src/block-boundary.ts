@@ -1,9 +1,7 @@
-import type MarkdownIt from 'markdown-it';
-import type ParserBlock from 'markdown-it/lib/parser_block';
-import type StateBlock from 'markdown-it/lib/rules_block/state_block';
-import type {MarkdownItWithDirectives} from 'markdown-it-directive';
+import type {BlockRule, MarkdownItConstructor, StateBlock} from './markdown-it';
+import type {MarkdownItWithDirectives} from './upstream';
 
-type Rule = {name: string; enabled: boolean; fn: ParserBlock.RuleBlock};
+type Rule = {name: string; enabled: boolean; fn: BlockRule};
 type Scope = {depth: number; root: boolean};
 
 /**
@@ -14,7 +12,7 @@ type Scope = {depth: number; root: boolean};
  * @returns Matching closer line, or -1 if the current scope has no closer.
  */
 function findClosingLine(state: StateBlock, startLine: number, endLine: number): number {
-    const Constructor = state.md.constructor as typeof MarkdownIt;
+    const Constructor = state.md.constructor as MarkdownItConstructor;
     const md = new Constructor('commonmark', state.md.options);
     const hostRules = (state.md.block.ruler as unknown as {__rules__: Rule[]}).__rules__;
     const enabled = new Set(hostRules.filter((rule) => rule.enabled).map((rule) => rule.name));
@@ -25,7 +23,7 @@ function findClosingLine(state: StateBlock, startLine: number, endLine: number):
 
     let closingLine = -1;
     const scopes: Scope[] = [];
-    const marker: ParserBlock.RuleBlock = (scanState, line, end, silent) => {
+    const marker: BlockRule = (scanState, line, end, silent) => {
         const pos = scanState.bMarks[line] + scanState.tShift[line];
         const max = scanState.eMarks[line];
         const after = scanState.skipChars(pos, 0x3a);
@@ -122,7 +120,7 @@ function findClosingLine(state: StateBlock, startLine: number, endLine: number):
  * @param rule - Original upstream block directive rule.
  * @returns Rule using Markdown-aware container boundaries.
  */
-export function withBlockBoundary(rule: ParserBlock.RuleBlock): ParserBlock.RuleBlock {
+export function withBlockBoundary(rule: BlockRule): BlockRule {
     return (state, startLine, endLine, silent) => {
         const start = state.bMarks[startLine] + state.tShift[startLine];
         if (state.src.slice(start, start + 3) !== ':::') {
