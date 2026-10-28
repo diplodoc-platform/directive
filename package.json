@@ -1,6 +1,6 @@
 {
   "name": "@diplodoc/directive",
-  "version": "0.4.0",
+  "version": "0.5.0-transform5.0",
   "description": "Directive syntax for Diplodoc platform",
   "main": "build/index.js",
   "types": "build/index.d.ts",
@@ -31,7 +31,8 @@
     "lint:fix": "lint fix",
     "pre-commit": "lint-staged",
     "prepare": "husky || true",
-    "lock": "npm install --no-workspaces --package-lock-only --ignore-scripts"
+    "lock": "npm install --no-workspaces --package-lock-only --ignore-scripts",
+    "test:packed": "node scripts/test-packed.mjs"
   },
   "devDependencies": {
     "@diplodoc/infra": "2.3.0",
@@ -44,9 +45,16 @@
     "npm-run-all": "^4.1.5",
     "ts-dedent": "^2.2.0",
     "typescript": "6.0.3",
-    "vitest": "^3.2.4"
-  },
-  "dependencies": {
+    "vitest": "^3.2.4",
     "markdown-it-directive": "^2.0.6"
+  },
+  "peerDependencies": {
+    "markdown-it": "^12.0.0 || ^13.0.0 || ^14.1.0 || ^15.0.3",
+    "@types/markdown-it": "^12.2.3 || ^13.0.9 || 14.1.0"
+  },
+  "peerDependenciesMeta": {
+    "@types/markdown-it": {
+      "optional": true
+    }
   }
 }

@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
-import type MarkdownIt from 'markdown-it';
+import type {MarkdownIt, Token} from '../markdown-it';
 import type {
     DirectiveBlockHandler,
     DirectiveBlockHandlerArgs,
     DirectiveInlineHandlerArgs,
     MarkdownItWithDirectives,
-} from 'markdown-it-directive';
+} from '../upstream';
 import type {
     CodeContainerDirectiveConfig,
     ContainerDirectiveConfig,
@@ -282,7 +282,7 @@ function buildDests(orig: DirectiveDestsOrig): DirectiveDests {
 }
 
 function applyTokenFields<P>(
-    token: MarkdownIt.Token,
+    token: Token,
     {attrs, meta}: TokensDesc<P>,
     params: P,
     env: Env,

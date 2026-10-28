@@ -1,7 +1,5 @@
-import type MarkdownIt from 'markdown-it';
-import type StateBlock from 'markdown-it/lib/rules_block/state_block';
-import type StateInline from 'markdown-it/lib/rules_inline/state_inline';
-import type {DirectiveAttrs, DirectiveDests as DirectiveDestsOrig} from 'markdown-it-directive';
+import type {MarkdownIt, StateBlock, StateInline} from './markdown-it';
+import type {DirectiveAttrs, DirectiveDests as DirectiveDestsOrig} from './upstream';
 import type {CONTAINER_KEY, LEAF_BLOCK_KEY} from './const';
 
 export type {StateBlock, StateInline};
