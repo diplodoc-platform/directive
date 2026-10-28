@@ -1,4 +1,4 @@
-import type MarkdownIt from 'markdown-it';
+import type {Token} from '../markdown-it';
 import type {
     ContainerDirectiveParams,
     InlineDirectiveParams,
@@ -45,7 +45,7 @@ export function tokenizeBlockContent(
 export function createBlockInlineToken(
     state: StateBlock,
     {inlineContent, startLine}: LeafBlockDirectiveParams,
-): MarkdownIt.Token {
+): Token {
     const token = state.push('inline', '', 0);
     token.children = [];
     token.content = inlineContent?.raw || '';

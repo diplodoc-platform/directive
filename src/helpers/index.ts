@@ -1,5 +1,5 @@
 /* eslint-disable valid-jsdoc */
-import type MarkdownIt from 'markdown-it';
+import type {MarkdownIt} from '../markdown-it';
 
 import {RULE} from '../const';
 

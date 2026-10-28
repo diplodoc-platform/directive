@@ -1,18 +1,17 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
-import type MarkdownIt from 'markdown-it';
+import type {MarkdownIt, Token} from '../markdown-it';
 import type {
     DirectiveBlockHandler,
     DirectiveBlockHandlerArgs,
     DirectiveInlineHandlerArgs,
     MarkdownItWithDirectives,
-} from 'markdown-it-directive';
+} from '../upstream';
 import type {
     CodeContainerDirectiveConfig,
     ContainerDirectiveConfig,
     ContainerDirectiveHandler,
     ContainerDirectiveParams,
-    DirectiveAttrs,
     DirectiveDests,
     DirectiveDestsOrig,
     Env,
@@ -70,11 +69,13 @@ export function registerContainerDirective(
     md: MarkdownIt,
     name: string,
     handler: ContainerDirectiveHandler,
+    options?: {onConflict?: 'replace' | 'error'},
 ): void;
 export function registerContainerDirective(
     md: MarkdownIt,
     nameOrConfig: string | ContainerDirectiveConfig | CodeContainerDirectiveConfig,
     maybeHandler?: ContainerDirectiveHandler,
+    options?: {onConflict?: 'replace' | 'error'},
 ): void {
     const [name, handler]: [string, ContainerDirectiveHandler] = isString(nameOrConfig)
         ? [nameOrConfig, maybeHandler!]
@@ -84,6 +85,12 @@ export function registerContainerDirective(
                   ? buildCodeContainerHandler(nameOrConfig)
                   : buildContainerHandler(nameOrConfig),
           ];
+
+    const onConflict = isString(nameOrConfig) ? options?.onConflict : nameOrConfig.onConflict;
+    const directives = (md as MarkdownItWithDirectives).blockDirectives;
+    if (onConflict === 'error' && Object.prototype.hasOwnProperty.call(directives, name)) {
+        throw new Error(`Block directive already registered: ${name}`);
+    }
 
     (md as MdItWithHandlers)[CONTAINER_KEY] ||= {};
     (md as MdItWithHandlers)[CONTAINER_KEY][name] = handler;
@@ -282,13 +289,13 @@ function buildDests(orig: DirectiveDestsOrig): DirectiveDests {
 }
 
 function applyTokenFields<P>(
-    token: MarkdownIt.Token,
+    token: Token,
     {attrs, meta}: TokensDesc<P>,
     params: P,
     env: Env,
 ): void {
     if (attrs !== undefined) {
-        const value: DirectiveAttrs = isFunction(attrs) ? attrs(params, env) : attrs;
+        const value: Record<string, string> = isFunction(attrs) ? attrs(params, env) : attrs;
         token.attrs = Object.entries(value);
     }
     if (meta !== undefined) {
