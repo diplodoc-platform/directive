@@ -4,6 +4,8 @@ import type StateInline from 'markdown-it/lib/rules_inline/state_inline';
 
 import directivePlugin from 'markdown-it-directive';
 
+import {withBlockBoundary} from './block-boundary';
+
 type RulerWithRules<T> = {
     __rules__: Array<{name: string; fn: T}>;
 };
@@ -35,7 +37,7 @@ function constrainBlockDirectiveLabels(md: MarkdownIt): void {
         return;
     }
 
-    const blockDirectiveRule = rule.fn;
+    const blockDirectiveRule = withBlockBoundary(rule.fn);
     patchedMd[BLOCK_LABELS_CONSTRAINED] = true;
     rule.fn = (state, startLine, endLine, silent) => {
         const parseLinkLabel = md.helpers.parseLinkLabel;
