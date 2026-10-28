@@ -41,6 +41,12 @@ The explicit root API exports remain unchanged. This preparation intentionally r
 
 The emitted declarations use type import attributes with an explicit resolution mode. Validation uses TypeScript 6.0.3 with strict NodeNext checks in ESM and CommonJS modes; no compiler minimum beyond that tested configuration is claimed.
 
+## Packed consumer checks
+
+Run `npm run test:packed -- all` after a standalone `npm ci --no-workspaces`, or select one of `12`, `13`, `14`, and `15`. The script builds and packs the current source, installs the tarball into independent temporary consumers, and runs the actual public ESM/CommonJS declaration fixtures and the container regression suite. It also checks the installed host, runtime exports, bundled license and declaration imports.
+
+The `Packed consumers` GitHub workflow runs each exact supported tuple separately. Reports include compiler/runtime logs and installed dependency graphs. Locally, the script prints its temporary report directory; `PACKED_CONSUMER_REPORT_DIR` can select a report destination.
+
 ## Quickstart
 
 Add new MarkdownIt-plugin or transformer extension, that plug-in a directive parser and register handler for new `block` directive:

@@ -31,7 +31,8 @@
     "lint:fix": "lint fix",
     "pre-commit": "lint-staged",
     "prepare": "husky || true",
-    "lock": "npm install --no-workspaces --package-lock-only --ignore-scripts"
+    "lock": "npm install --no-workspaces --package-lock-only --ignore-scripts",
+    "test:packed": "node scripts/test-packed.mjs"
   },
   "devDependencies": {
     "@diplodoc/infra": "2.3.0",

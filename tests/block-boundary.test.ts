@@ -1,4 +1,4 @@
-import type {ContainerDirectiveParams, StateBlock} from '../src/types';
+import type {ContainerDirectiveParams} from '@diplodoc/directive';
 
 import MarkdownIt from 'markdown-it';
 import {describe, expect, it, vi} from 'vitest';
@@ -10,7 +10,11 @@ import {
     registerLeafBlockDirective,
     tokenizeBlockContent,
     tokenizeInlineContent,
-} from '../src';
+} from '@diplodoc/directive';
+
+type StateBlock = Parameters<
+    Parameters<InstanceType<typeof MarkdownIt>['block']['ruler']['push']>[1]
+>[0];
 
 function parser(options: MarkdownIt.Options = {}) {
     const md = new MarkdownIt(options).use(directiveParser());
