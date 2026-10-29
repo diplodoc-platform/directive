@@ -1,7 +1,5 @@
-import type MarkdownIt from 'markdown-it';
-import type StateBlock from 'markdown-it/lib/rules_block/state_block';
-import type StateInline from 'markdown-it/lib/rules_inline/state_inline';
-import type {DirectiveAttrs, DirectiveDests as DirectiveDestsOrig} from 'markdown-it-directive';
+import type {MarkdownIt, StateBlock, StateInline} from './markdown-it';
+import type {DirectiveAttrs, DirectiveDests as DirectiveDestsOrig} from './upstream';
 import type {CONTAINER_KEY, LEAF_BLOCK_KEY} from './const';
 
 export type {StateBlock, StateInline};
@@ -48,33 +46,37 @@ export type InlineDirectiveParams = {
     content?: InlineContent;
 };
 
-export type ContainerDirectiveHandler = (
-    state: StateBlock,
+export type ContainerDirectiveHandler<S = StateBlock> = (
+    state: S,
     params: ContainerDirectiveParams,
 ) => boolean;
-export type LeafBlockDirectiveHandler = (
-    state: StateBlock,
+export type LeafBlockDirectiveHandler<S = StateBlock> = (
+    state: S,
     params: LeafBlockDirectiveParams,
 ) => boolean;
-export type InlineDirectiveHandler = (state: StateInline, params: InlineDirectiveParams) => boolean;
+export type InlineDirectiveHandler<S = StateInline> = (
+    state: S,
+    params: InlineDirectiveParams,
+) => boolean;
 
 export type TokensDesc<P> = {
     tag: string;
     token: string;
-    attrs?: DirectiveAttrs | ((params: P, env: Env) => DirectiveAttrs);
+    attrs?: Record<string, string> | ((params: P, env: Env) => Record<string, string>);
     meta?: object | ((params: P, env: Env) => object);
 };
 
-export type LeafBlockDirectiveConfig = {
+export type LeafBlockDirectiveConfig<S = StateBlock> = {
     name: string;
-    match: (params: LeafBlockDirectiveParams, state: StateBlock) => boolean;
+    match: (params: LeafBlockDirectiveParams, state: S) => boolean;
     container: TokensDesc<LeafBlockDirectiveParams>;
 };
 
-export type ContainerDirectiveConfig = {
+export type ContainerDirectiveConfig<S = StateBlock> = {
     name: string;
+    onConflict?: 'replace' | 'error';
     type?: 'container_block';
-    match: (params: ContainerDirectiveParams, state: StateBlock) => boolean;
+    match: (params: ContainerDirectiveParams, state: S) => boolean;
     container: TokensDesc<ContainerDirectiveParams>;
     inlineContent?: TokensDesc<ContainerDirectiveParams> & {
         /** @default true */
@@ -82,17 +84,14 @@ export type ContainerDirectiveConfig = {
     };
     content?: TokensDesc<ContainerDirectiveParams>;
     /** If not passed – default tokenizer will be used */
-    contentTokenizer?: (
-        state: StateBlock,
-        content: BlockContent,
-        params: ContainerDirectiveParams,
-    ) => void;
+    contentTokenizer?: (state: S, content: BlockContent, params: ContainerDirectiveParams) => void;
 };
 
-export type CodeContainerDirectiveConfig = {
+export type CodeContainerDirectiveConfig<S = StateBlock> = {
     name: string;
+    onConflict?: 'replace' | 'error';
     type: 'code_block';
-    match: (params: ContainerDirectiveParams, state: StateBlock) => boolean;
+    match: (params: ContainerDirectiveParams, state: S) => boolean;
     container: TokensDesc<ContainerDirectiveParams>;
 };
 
