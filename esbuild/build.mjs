@@ -4,6 +4,7 @@ import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
 import {readFileSync} from 'node:fs';
 import {createRequire} from 'node:module';
+import {fileURLToPath} from 'node:url';
 
 import {build} from '@diplodoc/infra/esbuild';
 
@@ -14,9 +15,13 @@ const require = createRequire(import.meta.url);
 
 // Refuse to bundle a different or unpatched upstream implementation, even if
 // installation lifecycle scripts were skipped.
-execFileSync(process.execPath, [require.resolve('patch-package'), '--error-on-fail'], {
-    stdio: 'inherit',
-});
+execFileSync(
+    process.execPath,
+    [fileURLToPath(new URL('../scripts/apply-upstream-patch.mjs', import.meta.url))],
+    {
+        stdio: 'inherit',
+    },
+);
 const upstream = require.resolve('markdown-it-directive');
 const upstreamSource = readFileSync(upstream, 'utf8').replace(/\r\n/g, '\n');
 const upstreamHash = createHash('sha256').update(upstreamSource).digest('hex');

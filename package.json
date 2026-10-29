@@ -30,7 +30,7 @@
     "lint": "lint",
     "lint:fix": "lint fix",
     "pre-commit": "lint-staged",
-    "prepare": "patch-package --error-on-fail 1>&2 && (husky || true)",
+    "prepare": "node scripts/apply-upstream-patch.mjs && (husky || true)",
     "lock": "npm install --no-workspaces --package-lock-only --ignore-scripts",
     "test:packed": "node scripts/test-packed.mjs"
   },
