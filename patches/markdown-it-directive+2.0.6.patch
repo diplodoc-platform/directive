@@ -1,0 +1,22 @@
+diff --git a/node_modules/markdown-it-directive/index.js b/node_modules/markdown-it-directive/index.js
+index 4f9ca47..8f1cbca 100644
+--- a/node_modules/markdown-it-directive/index.js
++++ b/node_modules/markdown-it-directive/index.js
+@@ -105,7 +105,7 @@ function parseAttrLabel(md, src, pos, max) {
+   if (pos >= max) return null;
+   if (src.charCodeAt(pos) !== 0x7B/* { */) return null;
+ 
+-  const attrs = {};
++  const attrs = Object.create(null);
+   ++pos, pos = skipBlanks(src, pos, max);
+   for (; pos < max; pos = skipBlanks(src, pos, max)) {
+     if (src.charCodeAt(pos) === 0x7D/* } */) {
+@@ -115,7 +115,7 @@ function parseAttrLabel(md, src, pos, max) {
+         if (attrs[key].length === 1) attrs[key] = attrs[key][0];
+       }
+ 
+-      return { pos, attrs };
++      return { pos, attrs: { ...attrs } };
+     }
+ 
+     const c = src.charCodeAt(pos);
