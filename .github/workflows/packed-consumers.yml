@@ -9,12 +9,12 @@ permissions:
 
 jobs:
   packed-consumers:
-    name: Native Markdown-it ${{ matrix.host }}
+    name: Markdown-it host ${{ matrix.host }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        host: ['12', '13', '14', '15']
+        host: ['12', '13', '14', '15', 'mixed']
     steps:
       - uses: actions/checkout@v5
       - uses: diplodoc-platform/setup-node-action@v1
