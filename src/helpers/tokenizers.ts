@@ -1,14 +1,12 @@
-import type {Token} from '../markdown-it';
+import type {BlockContentState, DirectiveToken, InlineContentState} from '../markdown-it';
 import type {
     ContainerDirectiveParams,
     InlineDirectiveParams,
     LeafBlockDirectiveParams,
-    StateBlock,
-    StateInline,
 } from '../types';
 
-export function tokenizeInlineContent(
-    state: StateInline,
+export function tokenizeInlineContent<I extends InlineContentState<I>>(
+    state: I,
     content: NonNullable<InlineDirectiveParams['content']>,
 ): void {
     const oldPos = state.pos;
@@ -23,15 +21,14 @@ export function tokenizeInlineContent(
     state.posMax = oldPosMax;
 }
 
-export function tokenizeBlockContent(
-    state: StateBlock,
+export function tokenizeBlockContent<B extends BlockContentState<B>>(
+    state: B,
     content: NonNullable<ContainerDirectiveParams['content']>,
     parentType?: string,
 ): void {
     const oldParent = state.parentType;
     const oldLineMax = state.lineMax;
 
-    // @ts-expect-error bad types of state.parentType
     state.parentType = parentType ?? 'directive';
     state.line = content.startLine;
     state.lineMax = content.endLine;
@@ -42,10 +39,10 @@ export function tokenizeBlockContent(
     state.parentType = oldParent;
 }
 
-export function createBlockInlineToken(
-    state: StateBlock,
+export function createBlockInlineToken<T extends DirectiveToken>(
+    state: {push(type: string, tag: string, nesting: -1 | 0 | 1): T},
     {inlineContent, startLine}: LeafBlockDirectiveParams,
-): Token {
+): T {
     const token = state.push('inline', '', 0);
     token.children = [];
     token.content = inlineContent?.raw || '';

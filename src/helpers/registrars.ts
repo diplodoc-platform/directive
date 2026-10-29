@@ -1,12 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
-import type {MarkdownIt, Token} from '../markdown-it';
-import type {
-    DirectiveBlockHandler,
-    DirectiveBlockHandlerArgs,
-    DirectiveInlineHandlerArgs,
-    MarkdownItWithDirectives,
-} from '../upstream';
+import type {BlockContentState, BlockHost, DirectiveToken, InlineHost} from '../markdown-it';
+import type {DirectiveBlockHandlerArgs, DirectiveInlineHandlerArgs} from '../upstream';
 import type {
     CodeContainerDirectiveConfig,
     ContainerDirectiveConfig,
@@ -20,64 +15,68 @@ import type {
     LeafBlockDirectiveConfig,
     LeafBlockDirectiveHandler,
     LeafBlockDirectiveParams,
-    MdItWithHandlers,
     TokensDesc,
 } from '../types';
 
 import {isFunction, isString} from '../utils';
 import {CONTAINER_KEY, LEAF_BLOCK_KEY} from '../const';
+import {assertHostState, invokeHandler, lookupHandler, registry} from '../runtime';
 
 import {createBlockInlineToken, tokenizeBlockContent} from './tokenizers';
 
-export function registerInlineDirective(
-    md: MarkdownIt,
+export function registerInlineDirective<I>(
+    md: InlineHost<I>,
     name: string,
-    handler: InlineDirectiveHandler,
+    handler: InlineDirectiveHandler<NoInfer<I>>,
 ): void {
-    (md as MarkdownItWithDirectives).inlineDirectives[name] = (args) => {
+    registry(md, 'inlineDirectives')[name] = (args: DirectiveInlineHandlerArgs<unknown>) => {
+        assertHostState(args.state, md.inline.State);
         const params: InlineDirectiveParams = buildInlineParams(args);
         return handler(args.state, params);
     };
 }
 
-export function registerLeafBlockDirective(md: MarkdownIt, config: LeafBlockDirectiveConfig): void;
-export function registerLeafBlockDirective(
-    md: MarkdownIt,
-    name: string,
-    handler: LeafBlockDirectiveHandler,
+export function registerLeafBlockDirective<B extends BlockContentState<B>>(
+    md: BlockHost<B>,
+    config: LeafBlockDirectiveConfig<NoInfer<B>>,
 ): void;
-export function registerLeafBlockDirective(
-    md: MarkdownIt,
-    nameOrConfig: string | LeafBlockDirectiveConfig,
-    maybeHandler?: LeafBlockDirectiveHandler,
+export function registerLeafBlockDirective<B extends BlockContentState<B>>(
+    md: BlockHost<B>,
+    name: string,
+    handler: LeafBlockDirectiveHandler<NoInfer<B>>,
+): void;
+export function registerLeafBlockDirective<B extends BlockContentState<B>>(
+    md: BlockHost<B>,
+    nameOrConfig: string | LeafBlockDirectiveConfig<B>,
+    maybeHandler?: LeafBlockDirectiveHandler<B>,
 ): void {
-    const [name, handler]: [string, LeafBlockDirectiveHandler] = isString(nameOrConfig)
+    const [name, handler]: [string, LeafBlockDirectiveHandler<B>] = isString(nameOrConfig)
         ? [nameOrConfig, maybeHandler!]
         : [nameOrConfig.name, buildLeafBlockHandler(nameOrConfig)];
 
-    (md as MdItWithHandlers)[LEAF_BLOCK_KEY] ||= {};
-    (md as MdItWithHandlers)[LEAF_BLOCK_KEY][name] = handler;
+    registry(md, LEAF_BLOCK_KEY, true);
+    registry(md, LEAF_BLOCK_KEY)[name] = handler;
 
-    (md as MarkdownItWithDirectives).blockDirectives[name] = getBlockDefaultHandler(md, name);
+    registry(md, 'blockDirectives')[name] = getBlockDefaultHandler(md, name);
 }
 
-export function registerContainerDirective(
-    md: MarkdownIt,
-    config: ContainerDirectiveConfig | CodeContainerDirectiveConfig,
+export function registerContainerDirective<B extends BlockContentState<B>>(
+    md: BlockHost<B>,
+    config: ContainerDirectiveConfig<NoInfer<B>> | CodeContainerDirectiveConfig<NoInfer<B>>,
 ): void;
-export function registerContainerDirective(
-    md: MarkdownIt,
+export function registerContainerDirective<B extends BlockContentState<B>>(
+    md: BlockHost<B>,
     name: string,
-    handler: ContainerDirectiveHandler,
+    handler: ContainerDirectiveHandler<NoInfer<B>>,
     options?: {onConflict?: 'replace' | 'error'},
 ): void;
-export function registerContainerDirective(
-    md: MarkdownIt,
-    nameOrConfig: string | ContainerDirectiveConfig | CodeContainerDirectiveConfig,
-    maybeHandler?: ContainerDirectiveHandler,
+export function registerContainerDirective<B extends BlockContentState<B>>(
+    md: BlockHost<B>,
+    nameOrConfig: string | ContainerDirectiveConfig<B> | CodeContainerDirectiveConfig<B>,
+    maybeHandler?: ContainerDirectiveHandler<B>,
     options?: {onConflict?: 'replace' | 'error'},
 ): void {
-    const [name, handler]: [string, ContainerDirectiveHandler] = isString(nameOrConfig)
+    const [name, handler]: [string, ContainerDirectiveHandler<B>] = isString(nameOrConfig)
         ? [nameOrConfig, maybeHandler!]
         : [
               nameOrConfig.name,
@@ -87,35 +86,38 @@ export function registerContainerDirective(
           ];
 
     const onConflict = isString(nameOrConfig) ? options?.onConflict : nameOrConfig.onConflict;
-    const directives = (md as MarkdownItWithDirectives).blockDirectives;
+    const directives = registry(md, 'blockDirectives');
     if (onConflict === 'error' && Object.prototype.hasOwnProperty.call(directives, name)) {
         throw new Error(`Block directive already registered: ${name}`);
     }
 
-    (md as MdItWithHandlers)[CONTAINER_KEY] ||= {};
-    (md as MdItWithHandlers)[CONTAINER_KEY][name] = handler;
+    registry(md, CONTAINER_KEY, true);
+    registry(md, CONTAINER_KEY)[name] = handler;
 
-    (md as MarkdownItWithDirectives).blockDirectives[name] = getBlockDefaultHandler(md, name);
+    registry(md, 'blockDirectives')[name] = getBlockDefaultHandler(md, name);
 }
 
-function getBlockDefaultHandler(md: MarkdownIt, name: string): DirectiveBlockHandler {
-    return (args) => {
-        const containerHandler = (md as MdItWithHandlers)[CONTAINER_KEY]?.[name];
-        const leafBlockHandler = (md as MdItWithHandlers)[LEAF_BLOCK_KEY]?.[name];
+function getBlockDefaultHandler<B>(md: BlockHost<B>, name: string) {
+    return (args: DirectiveBlockHandlerArgs<unknown>) => {
+        assertHostState(args.state, md.block.State);
+        const containerHandler = lookupHandler(md, CONTAINER_KEY, name);
+        const leafBlockHandler = lookupHandler(md, LEAF_BLOCK_KEY, name);
 
         if (isString(args.content)) {
             if (containerHandler) {
-                return containerHandler(args.state, buildContainerParams(args));
+                return invokeHandler(containerHandler, args.state, buildContainerParams(args));
             }
         } else if (leafBlockHandler) {
-            return leafBlockHandler(args.state, buildLeafBlockParams(args));
+            return invokeHandler(leafBlockHandler, args.state, buildLeafBlockParams(args));
         }
 
         return false;
     };
 }
 
-function buildLeafBlockHandler(config: LeafBlockDirectiveConfig): LeafBlockDirectiveHandler {
+function buildLeafBlockHandler<B extends BlockContentState<B>>(
+    config: LeafBlockDirectiveConfig<B>,
+): LeafBlockDirectiveHandler<B> {
     return (state, params) => {
         if (!config.match(params, state)) {
             return false;
@@ -132,7 +134,9 @@ function buildLeafBlockHandler(config: LeafBlockDirectiveConfig): LeafBlockDirec
     };
 }
 
-function buildContainerHandler(config: ContainerDirectiveConfig): ContainerDirectiveHandler {
+function buildContainerHandler<B extends BlockContentState<B>>(
+    config: ContainerDirectiveConfig<B>,
+): ContainerDirectiveHandler<B> {
     return (state, params) => {
         if (!params.content) {
             return false;
@@ -186,9 +190,9 @@ function buildContainerHandler(config: ContainerDirectiveConfig): ContainerDirec
     };
 }
 
-function buildCodeContainerHandler(
-    config: CodeContainerDirectiveConfig,
-): ContainerDirectiveHandler {
+function buildCodeContainerHandler<B extends BlockContentState<B>>(
+    config: CodeContainerDirectiveConfig<B>,
+): ContainerDirectiveHandler<B> {
     return (state, params) => {
         if (!params.content) {
             return false;
@@ -211,7 +215,7 @@ function buildCodeContainerHandler(
     };
 }
 
-function buildInlineParams(args: DirectiveInlineHandlerArgs): InlineDirectiveParams {
+function buildInlineParams(args: DirectiveInlineHandlerArgs<unknown>): InlineDirectiveParams {
     const params: InlineDirectiveParams = {
         startPos: args.directiveStart,
         endPos: args.directiveEnd,
@@ -232,7 +236,7 @@ function buildInlineParams(args: DirectiveInlineHandlerArgs): InlineDirectivePar
     return params;
 }
 
-function buildLeafBlockParams(args: DirectiveBlockHandlerArgs): LeafBlockDirectiveParams {
+function buildLeafBlockParams(args: DirectiveBlockHandlerArgs<unknown>): LeafBlockDirectiveParams {
     const params: LeafBlockDirectiveParams = {
         startLine: args.directiveStartLine,
         endLine: args.directiveEndLine,
@@ -260,7 +264,7 @@ function buildLeafBlockParams(args: DirectiveBlockHandlerArgs): LeafBlockDirecti
     return params;
 }
 
-function buildContainerParams(args: DirectiveBlockHandlerArgs): ContainerDirectiveParams {
+function buildContainerParams(args: DirectiveBlockHandlerArgs<unknown>): ContainerDirectiveParams {
     const params = buildLeafBlockParams(args);
     return {
         ...params,
@@ -289,7 +293,7 @@ function buildDests(orig: DirectiveDestsOrig): DirectiveDests {
 }
 
 function applyTokenFields<P>(
-    token: Token,
+    token: DirectiveToken,
     {attrs, meta}: TokensDesc<P>,
     params: P,
     env: Env,

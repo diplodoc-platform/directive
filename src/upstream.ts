@@ -3,8 +3,8 @@ import type {MarkdownIt, StateBlock, StateInline} from './markdown-it';
 export type DirectiveAttrs = Record<string, string | string[]>;
 export type DirectiveDests = ['link' | 'string', string][];
 
-export type DirectiveInlineHandlerArgs = {
-    state: StateInline;
+export type DirectiveInlineHandlerArgs<S = StateInline> = {
+    state: S;
     content: string | undefined;
     dests: DirectiveDests | undefined;
     attrs: DirectiveAttrs | undefined;
@@ -14,8 +14,8 @@ export type DirectiveInlineHandlerArgs = {
     directiveEnd: number;
 };
 
-export type DirectiveBlockHandlerArgs = {
-    state: StateBlock;
+export type DirectiveBlockHandlerArgs<S = StateBlock> = {
+    state: S;
     content?: string;
     contentTitle: string;
     inlineContent: string | undefined;

@@ -222,3 +222,33 @@ Container registrations replace an existing block directive with the same name b
     params: BlockDirectiveParams,
   ): MarkdownIt.Token;
   ```
+
+### TypeScript hosts
+
+The parser and registration helpers accept finite capabilities of the supplied MarkdownIt host.
+Handler states are inferred from that host's native state constructors, including when multiple
+MarkdownIt versions coexist in one installation. Explicit handler/configuration types accept a
+state type parameter; their default remains the package-resolved native type for compatibility.
+
+```ts
+import MarkdownIt from 'markdown-it';
+import {directiveParser, registerContainerDirective} from '@diplodoc/directive';
+import type {ContainerDirectiveHandler} from '@diplodoc/directive';
+
+const md = new MarkdownIt().use(directiveParser());
+type BlockState = InstanceType<typeof md.block.State>;
+const handler: ContainerDirectiveHandler<BlockState> = (state, params) => {
+  state.push('example', 'div', 0).content = params.content.raw;
+  return true;
+};
+registerContainerDirective(md, 'example', handler);
+```
+
+A handler typed for another incompatible host is rejected. Helpers preserve the caller's native
+token type; directive-generated attributes are strings, while native numeric attributes remain
+readable. Runtime rule tables and directive registries are internal and are not required in the
+host's public declarations.
+
+`npm run test:packed -- all` verifies installed native 12, 13, 14, and 15 hosts and a mixed root-13 /
+aliased-15 installation, with strict ESM/CJS declarations and runtime regressions. Use `mixed` to
+run only the coexistence fixture.

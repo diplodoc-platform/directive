@@ -25,6 +25,12 @@ const hosts = [
     {id: '13', runtime: '13.0.2', types: '13.0.9', extra: {}},
     {id: '14', runtime: '14.1.0', types: '14.1.0', extra: {mdurl: '2.0.0'}},
     {id: '15', runtime: '15.0.3', types: null, extra: {}},
+    {
+        id: 'mixed',
+        runtime: '13.0.2',
+        types: '13.0.9',
+        extra: {'markdown-it-transform15': 'npm:markdown-it@15.0.3'},
+    },
 ];
 const selected = process.argv[2] ?? 'all';
 assert(process.argv.length <= 3, 'Expected one host selector.');
@@ -118,7 +124,23 @@ for (const host of matrix) {
     });
     writeFileSync(join(dir, 'consumer.mts'), esm);
     writeFileSync(join(dir, 'consumer.cts'), cjs);
-    copyFileSync(join(fixture, 'tsconfig.json'), join(dir, 'tsconfig.json'));
+    const tsconfig = JSON.parse(readFileSync(join(fixture, 'tsconfig.json'), 'utf8'));
+    tsconfig.include.push('node_modules/@diplodoc/directive/build/**/*.d.ts');
+    if (host.id === 'mixed') {
+        const mixed = readFileSync(join(fixture, 'mixed.mts'), 'utf8');
+        writeFileSync(join(dir, 'mixed.mts'), mixed);
+        writeFileSync(
+            join(dir, 'mixed.cts'),
+            mixed
+                .replace(importLine, "import MarkdownIt = require('markdown-it');")
+                .replace(
+                    "import MarkdownIt15 from 'markdown-it-transform15';",
+                    "import MarkdownIt15 = require('markdown-it-transform15');",
+                ),
+        );
+        tsconfig.include.push('mixed.mts', 'mixed.cts');
+    }
+    json(join(dir, 'tsconfig.json'), tsconfig);
     copyFileSync(join(root, 'tests', 'block-boundary.test.ts'), join(dir, 'boundary.test.ts'));
     const validation = readFileSync(join(root, 'tests', 'attribute-validation.test.ts'), 'utf8');
     writeFileSync(
@@ -187,6 +209,21 @@ process.stdout.write(JSON.stringify({esm: named, cjs: Object.keys(cjs).sort()}) 
 
     npm(['run', 'typecheck'], dir, join(report, 'types.log'));
     npm(['test'], dir, join(report, 'runtime.log'));
+    if (host.id === 'mixed') {
+        assert.equal(consumerRequire('markdown-it-transform15/package.json').version, '15.0.3');
+        const boundary = readFileSync(join(root, 'tests', 'block-boundary.test.ts'), 'utf8');
+        writeFileSync(
+            join(dir, 'boundary-alias.test.ts'),
+            boundary.replace("from 'markdown-it'", "from 'markdown-it-transform15'"),
+        );
+        writeFileSync(
+            join(dir, 'attribute-validation-alias.test.ts'),
+            validation
+                .replace("from '../src'", "from '@diplodoc/directive'")
+                .replace("from 'markdown-it'", "from 'markdown-it-transform15'"),
+        );
+        npm(['test'], dir, join(report, 'runtime-mixed.log'));
+    }
     const tree = npm(['ls', '--all', '--json'], dir, join(report, 'installed-tree.json'));
     json(join(report, 'proof.json'), {host, hostPath, entry, tarSha256, tree: JSON.parse(tree)});
     copyFileSync(join(dir, 'package.json'), join(report, 'package.json'));

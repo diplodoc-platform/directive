@@ -1,7 +1,7 @@
-import type {BlockRule, MarkdownItConstructor, StateBlock} from './markdown-it';
-import type {MarkdownItWithDirectives} from './upstream';
+import type {BoundaryRule, BoundaryState} from './runtime';
 
-type Rule = {name: string; enabled: boolean; fn: BlockRule};
+import {assertBoundaryState, assertScanner, registry, runtimeRules} from './runtime';
+
 type Scope = {depth: number; root: boolean};
 
 /**
@@ -11,19 +11,19 @@ type Scope = {depth: number; root: boolean};
  * @param endLine - Exclusive end of the current Markdown scope.
  * @returns Matching closer line, or -1 if the current scope has no closer.
  */
-function findClosingLine(state: StateBlock, startLine: number, endLine: number): number {
-    const Constructor = state.md.constructor as MarkdownItConstructor;
-    const md = new Constructor('commonmark', state.md.options);
-    const hostRules = (state.md.block.ruler as unknown as {__rules__: Rule[]}).__rules__;
+function findClosingLine(state: BoundaryState, startLine: number, endLine: number): number {
+    const md: unknown = Reflect.construct(state.md.constructor, ['commonmark', state.md.options]);
+    assertScanner(md);
+    const hostRules = runtimeRules<BoundaryState>(state.md.block.ruler);
     const enabled = new Set(hostRules.filter((rule) => rule.enabled).map((rule) => rule.name));
-    const nativeRules = (md.block.ruler as unknown as {__rules__: Rule[]}).__rules__;
+    const nativeRules = runtimeRules<BoundaryState>(md.block.ruler);
     md.block.ruler.enableOnly(
         nativeRules.filter((rule) => enabled.has(rule.name)).map(({name}) => name),
     );
 
     let closingLine = -1;
     const scopes: Scope[] = [];
-    const marker: BlockRule = (scanState, line, end, silent) => {
+    const marker: BoundaryRule<BoundaryState> = (scanState, line, end, silent) => {
         const pos = scanState.bMarks[line] + scanState.tShift[line];
         const max = scanState.eMarks[line];
         const after = scanState.skipChars(pos, 0x3a);
@@ -96,7 +96,9 @@ function findClosingLine(state: StateBlock, startLine: number, endLine: number):
     });
 
     // Preserve the current list/quote offsets, but isolate every mutable parser field.
-    const scanState = Object.assign(new md.block.State(state.src, md, {}, []), {
+    const scanState: unknown = Reflect.construct(md.block.State, [state.src, md, {}, []]);
+    assertBoundaryState(scanState);
+    Object.assign(scanState, {
         bMarks: state.bMarks.slice(),
         eMarks: state.eMarks.slice(),
         tShift: state.tShift.slice(),
@@ -110,7 +112,7 @@ function findClosingLine(state: StateBlock, startLine: number, endLine: number):
         parentType: state.parentType,
         level: state.level,
         tight: state.tight,
-    }) as StateBlock;
+    });
     md.block.tokenize(scanState, startLine + 1, endLine);
     return closingLine;
 }
@@ -120,7 +122,7 @@ function findClosingLine(state: StateBlock, startLine: number, endLine: number):
  * @param rule - Original upstream block directive rule.
  * @returns Rule using Markdown-aware container boundaries.
  */
-export function withBlockBoundary(rule: BlockRule): BlockRule {
+export function withBlockBoundary<B extends BoundaryState>(rule: BoundaryRule<B>): BoundaryRule<B> {
     return (state, startLine, endLine, silent) => {
         const start = state.bMarks[startLine] + state.tShift[startLine];
         if (state.src.slice(start, start + 3) !== ':::') {
@@ -130,10 +132,7 @@ export function withBlockBoundary(rule: BlockRule): BlockRule {
             .slice(start, state.eMarks[startLine])
             .match(/^:{3,}[ \t]*([a-z][a-z0-9_-]*)/i)?.[1];
         const normalizedName = name?.toLowerCase().replace('_', '-');
-        if (
-            !normalizedName ||
-            !(state.md as MarkdownItWithDirectives).blockDirectives[normalizedName]
-        ) {
+        if (!normalizedName || !registry(state.md, 'blockDirectives')[normalizedName]) {
             return rule(state, startLine, endLine, silent);
         }
 

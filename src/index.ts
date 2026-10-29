@@ -1,17 +1,27 @@
-import type {BlockRule, MarkdownIt, PluginSimple, StateInline} from './markdown-it';
+import type {DirectiveHost} from './markdown-it';
+import type {BoundaryState} from './runtime';
 
 import directivePlugin from 'markdown-it-directive';
 
 import {withBlockBoundary} from './block-boundary';
-
-type RulerWithRules<T> = {
-    __rules__: Array<{name: string; fn: T}>;
-};
+import {runtimeRules} from './runtime';
 
 const BLOCK_LABELS_CONSTRAINED = Symbol('block-labels-constrained');
 
-type PatchedMarkdownIt = MarkdownIt & {
-    [BLOCK_LABELS_CONSTRAINED]?: boolean;
+export type DirectiveInlineState = {src: string; pos: number; posMax: number; env: unknown};
+export type DirectiveBlockState = BoundaryState & {
+    env: unknown;
+    skipCharsBack(pos: number, code: number, min: number): number;
+    getLines(begin: number, end: number, indent: number, keepLastLF: boolean): string;
+};
+type LinkResult = {ok: boolean; pos: number; str: string};
+export type DirectiveParserHost<B, I> = DirectiveHost<B, I> & {
+    helpers: {
+        parseLinkLabel(state: I, start: number, disableNested?: boolean): number;
+        parseLinkTitle(src: string, pos: number, max: number): LinkResult;
+        parseLinkDestination(src: string, pos: number, max: number): LinkResult;
+    };
+    utils: {normalizeReference(value: string): string};
 };
 
 function lineEnd(src: string, start: number, fallback: number): number {
@@ -22,29 +32,28 @@ function lineEnd(src: string, start: number, fallback: number): number {
     return ends.length ? Math.min(...ends) : fallback;
 }
 
-function constrainBlockDirectiveLabels(md: MarkdownIt): void {
-    const patchedMd = md as PatchedMarkdownIt;
-    if (patchedMd[BLOCK_LABELS_CONSTRAINED]) {
+function constrainBlockDirectiveLabels<
+    B extends DirectiveBlockState,
+    I extends DirectiveInlineState,
+>(md: DirectiveParserHost<B, I>): void {
+    if (Reflect.get(md, BLOCK_LABELS_CONSTRAINED)) {
         return;
     }
 
-    const ruler = md.block.ruler as unknown as RulerWithRules<BlockRule>;
-    const rule = ruler.__rules__.find(({name}) => name === 'block_directive');
+    const rule = runtimeRules<B>(md.block.ruler).find(({name}) => name === 'block_directive');
 
     if (!rule) {
         return;
     }
 
     const blockDirectiveRule = withBlockBoundary(rule.fn);
-    patchedMd[BLOCK_LABELS_CONSTRAINED] = true;
+    if (!Reflect.set(md, BLOCK_LABELS_CONSTRAINED, true)) {
+        throw new TypeError('Cannot mark directive block labels as constrained');
+    }
     rule.fn = (state, startLine, endLine, silent) => {
         const parseLinkLabel = md.helpers.parseLinkLabel;
 
-        md.helpers.parseLinkLabel = (
-            inlineState: StateInline,
-            start: number,
-            disableNested?: boolean,
-        ) => {
+        md.helpers.parseLinkLabel = (inlineState: I, start: number, disableNested?: boolean) => {
             if (inlineState.src.charCodeAt(start) !== 0x5b /* [ */) {
                 return -1;
             }
@@ -85,6 +94,14 @@ export {
 } from './helpers/tokenizers';
 
 export type {
+    BlockContentState,
+    InlineContentState,
+    DirectiveToken,
+    BlockHost,
+    InlineHost,
+} from './markdown-it';
+
+export type {
     DirectiveAttrs,
     DirectiveDests,
     LeafBlockDirectiveConfig,
@@ -98,9 +115,13 @@ export type {
     InlineDirectiveHandler,
 } from './types';
 
-export const directiveParser = (): PluginSimple => {
-    return (md) => {
-        directivePlugin(md);
+export const directiveParser = () => {
+    return <B extends DirectiveBlockState, I extends DirectiveInlineState>(
+        md: DirectiveParserHost<B, I>,
+    ) => {
+        // The pinned upstream JS installer only installs its two rules and tables.
+        // Keep its full native dev declaration out of our public host contract.
+        Reflect.apply(directivePlugin, undefined, [md]);
         constrainBlockDirectiveLabels(md);
     };
 };

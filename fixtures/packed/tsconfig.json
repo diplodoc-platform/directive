@@ -7,5 +7,5 @@
     "skipLibCheck": false,
     "noEmit": true
   },
-  "include": ["consumer.mts", "consumer.cts"]
+  "include": ["consumer.mts", "consumer.cts", "mixed.mts"]
 }

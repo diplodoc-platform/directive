@@ -1,3 +1,5 @@
+import type {DirectiveToken} from '@diplodoc/directive';
+
 import MarkdownIt from 'markdown-it';
 
 import {
@@ -117,3 +119,13 @@ registerInlineDirective(md, 'inline', (state, params) => {
 
 md.parse(':::box\ntext :inline[content]\n:::\n', {});
 md.render('::leaf [title]\n');
+
+export function finiteTokenWrites(token: DirectiveToken): void {
+    token.attrs = [['safe', 'value']];
+    // @ts-expect-error The finite helper port cannot write numeric attrs into native 13 tokens.
+    token.attrs = [['unsafe', 1]];
+    // @ts-expect-error The readable union must not allow mutation through an aliased attrs array.
+    token.attrs?.push(['unsafe', 1]);
+    // @ts-expect-error Child token reads cannot accept arbitrary new children.
+    token.children?.push('unsafe');
+}
