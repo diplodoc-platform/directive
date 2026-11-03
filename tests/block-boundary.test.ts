@@ -1,10 +1,11 @@
-import type {ContainerDirectiveParams} from '@diplodoc/directive';
+import type {BlockBoundaryInput, ContainerDirectiveParams} from '@diplodoc/directive';
 
 import MarkdownIt from 'markdown-it';
 import {describe, expect, it, vi} from 'vitest';
 
 import {
     directiveParser,
+    registerBlockBoundary,
     registerContainerDirective,
     registerInlineDirective,
     registerLeafBlockDirective,
@@ -72,6 +73,35 @@ describe('container block boundaries', () => {
         expect(calls[0].endLine).toBe(6);
         expect(tokens.find((token) => token.type === 'fence')?.content).toBe(':::\n:::example\n');
         expect(tokens.at(-2)?.content).toBe('AFTER');
+    });
+
+    it('recognizes registered opaque blocks only while the exact rule is enabled', () => {
+        const {md, calls} = parser();
+        const original = () => false;
+        const recognize = vi.fn((input: BlockBoundaryInput, start: number, end: number) => {
+            expect(Object.isFrozen(input)).toBe(true);
+            expect(Object.isFrozen(input.bMarks)).toBe(true);
+            if (input.src.slice(input.bMarks[start], input.eMarks[start]) !== 'opaque') return null;
+            return Math.min(start + 3, end);
+        });
+        md.block.ruler.before('code', 'opaque', original);
+        registerBlockBoundary(md, 'opaque', original, recognize);
+        const source = ':::box\nopaque\n:::\nend\n:::\n';
+        md.parse(source, {});
+        expect(calls[0].endLine).toBe(5);
+        expect(recognize).toHaveBeenCalled();
+        calls.length = 0;
+        recognize.mockClear();
+        md.disable('opaque');
+        md.parse(source, {});
+        expect(calls[0].endLine).toBe(3);
+        expect(recognize).not.toHaveBeenCalled();
+        calls.length = 0;
+        md.enable('opaque');
+        md.block.ruler.at('opaque', () => false);
+        md.parse(source, {});
+        expect(calls[0].endLine).toBe(3);
+        expect(recognize).not.toHaveBeenCalled();
     });
 
     it('keeps mixed lengths and balanced unknown and known nesting', () => {

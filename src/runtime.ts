@@ -67,7 +67,13 @@ export type BoundaryState = {
 
 export type BoundaryRule<S> = (state: S, start: number, end: number, silent: boolean) => boolean;
 
-type Rule<S> = {name: string; enabled: boolean; fn: BoundaryRule<S>};
+type Rule<S> = {
+    name: string;
+    enabled: boolean;
+    alt: string[];
+    readonly identity: unknown;
+    fn: BoundaryRule<S>;
+};
 
 /**
  * Access the existing runtime rule list without exposing its private shape.
@@ -84,6 +90,8 @@ export function runtimeRules<S>(ruler: object): Rule<S>[] {
             !isRecord(rule) ||
             typeof rule.name !== 'string' ||
             typeof rule.enabled !== 'boolean' ||
+            !Array.isArray(rule.alt) ||
+            !rule.alt.every((item: unknown) => typeof item === 'string') ||
             typeof rule.fn !== 'function'
         ) {
             throw new TypeError('Invalid native block rule');
@@ -91,6 +99,10 @@ export function runtimeRules<S>(ruler: object): Rule<S>[] {
         return {
             name: rule.name,
             enabled: rule.enabled,
+            alt: rule.alt as string[],
+            get identity(): unknown {
+                return rule.fn;
+            },
             get fn(): BoundaryRule<S> {
                 const fn = rule.fn;
                 if (typeof fn !== 'function') throw new TypeError('Invalid native block rule');

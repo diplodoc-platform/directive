@@ -125,3 +125,6 @@ export const directiveParser = () => {
         constrainBlockDirectiveLabels(md);
     };
 };
+
+export {registerBlockBoundary} from './block-recognizers';
+export type {BlockBoundaryInput, BlockBoundaryRecognizer} from './block-recognizers';

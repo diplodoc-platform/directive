@@ -93,6 +93,7 @@ const expectedExports = [
     'disableInlineDirectives',
     'enableBlockDirectives',
     'enableInlineDirectives',
+    'registerBlockBoundary',
     'registerContainerDirective',
     'registerInlineDirective',
     'registerLeafBlockDirective',
