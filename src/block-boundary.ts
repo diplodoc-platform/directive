@@ -1,8 +1,10 @@
+import type {BlockBoundaryInput} from './block-recognizers';
 import type {BoundaryRule, BoundaryState} from './runtime';
 
+import {blockBoundaries} from './block-recognizers';
 import {assertBoundaryState, assertScanner, registry, runtimeRules} from './runtime';
 
-type Scope = {depth: number; root: boolean};
+type Scope = {depth: number; root: boolean; input?: BlockBoundaryInput};
 
 /**
  * Find container delimiters with the host parser's native Markdown block rules.
@@ -85,6 +87,43 @@ function findClosingLine(state: BoundaryState, startLine: number, endLine: numbe
     md.block.ruler.before('heading', 'directive_boundary', marker, {
         alt: ['paragraph', 'reference', 'blockquote', 'list'],
     });
+    const boundaries = blockBoundaries(state.md);
+    for (const [index, hostRule] of hostRules.entries()) {
+        const registration = boundaries?.get(hostRule.name);
+        if (!hostRule.enabled || !registration || hostRule.identity !== registration.rule) {
+            continue;
+        }
+        const nextNative = hostRules
+            .slice(index + 1)
+            .find((candidate) => nativeRules.some(({name}) => name === candidate.name));
+        const before = nextNative?.name ?? 'paragraph';
+        md.block.ruler.before(
+            before,
+            `directive_opaque_${index}`,
+            (scanState, line, end, silent) => {
+                const scope = scopes[scopes.length - 1];
+                scope.input ??= Object.freeze({
+                    src: scanState.src,
+                    bMarks: Object.freeze(scanState.bMarks.slice()),
+                    eMarks: Object.freeze(scanState.eMarks.slice()),
+                    tShift: Object.freeze(scanState.tShift.slice()),
+                    lineMax: scanState.lineMax,
+                });
+                const close = registration.recognize(scope.input, line, end);
+                if (close === null) {
+                    return false;
+                }
+                if (!Number.isInteger(close) || close <= line || close > end) {
+                    throw new RangeError('Invalid opaque block boundary');
+                }
+                if (!silent) {
+                    scanState.line = close;
+                }
+                return true;
+            },
+            {alt: hostRule.alt},
+        );
+    }
     // A registered container may consume its body literally even when the host
     // disables paragraph parsing or supplies its own block rules for that text.
     md.block.ruler.push('directive_boundary_fallback', (scanState, line, _end, silent) => {

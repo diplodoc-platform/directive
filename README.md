@@ -252,3 +252,9 @@ host's public declarations.
 `npm run test:packed -- all` verifies installed native 12, 13, 14, and 15 hosts and a mixed root-13 /
 aliased-15 installation, with strict ESM/CJS declarations and runtime regressions. Use `mixed` to
 run only the coexistence fixture.
+
+### Opaque block boundaries
+
+A plugin that owns a block grammar can call `registerBlockBoundary(md, ruleName, rule, recognize)` to keep directive delimiters inside its blocks from closing an enclosing directive. `rule` is the exact callback installed in the host block ruler. The recognizer is ignored when that rule is disabled or replaced.
+
+The recognizer receives a frozen source and line-position snapshot and returns the exclusive ending line, or `null` when no complete block matches. It may run during lookahead and must have no side effects. If it calls parser helpers, those helpers must also be safe for lookahead. The snapshot does not expose the mutable host parser.
