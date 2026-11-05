@@ -76,8 +76,23 @@ case. These counters measure discovery overhead; the host still indexes its
 input normally and each scanner visits its container's content. They do not
 claim linear time for arbitrarily deep nested containers or arbitrary callbacks.
 
-Manual native-15 scoped timings (seven warm samples) were 1.09/2.87/10.18 ms
-before and 0.88/1.70/3.96 ms after for 40/80/160 containers. Timings are local
+Manual native-15 scoped timings (seven warm samples) were 1.34/2.72/8.91 ms
+before and 0.89/1.88/4.01 ms after for 40/80/160 containers. Timings are local
 supporting observations, not a CI or production latency guarantee. Default
 snapshot callbacks intentionally retain full snapshot copying; consumers need
 an explicit scoped opt-in to obtain the opaque-recognizer allocation benefit.
+
+The separate local Transform Table opt-in was tested with normal npm-installed
+archive overrides for the reviewed Notes and Tabs companions and one common
+Directive package. Eight complete public token/result comparisons passed,
+including nested Cuts with fenced markers inside YFM tables. At 20/40/80
+independent Notes containing tables, baseline discovery indexed
+20,400/81,600/326,400 characters and copied 32,160/128,320/512,640 cells; scoped
+Table discovery indexed/copied zero whole-document characters/cells.
+
+The existing duplicated-Directive dependency graph remains a negative control:
+its module-local opaque registries cannot communicate across physical copies,
+and nested Cut/table output remains incorrect in both baseline and candidate.
+This scanner change does not repair dependency alignment. The prepared common
+archive override graph is a local integration check, not publication or changed
+product pins.
