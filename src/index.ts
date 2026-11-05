@@ -1,12 +1,11 @@
 import type {DirectiveHost} from './markdown-it';
-import type {BoundaryState} from './runtime';
+import type {BoundaryRule, BoundaryState} from './runtime';
 
 import directivePlugin from 'markdown-it-directive';
 
 import {withBlockBoundary} from './block-boundary';
+import {boundaryHost} from './block-recognizers';
 import {registry, runtimeRules} from './runtime';
-
-const BLOCK_LABELS_CONSTRAINED = Symbol('block-labels-constrained');
 
 export type DirectiveInlineState = {src: string; pos: number; posMax: number; env: unknown};
 export type DirectiveBlockState = BoundaryState & {
@@ -36,21 +35,15 @@ function constrainBlockDirectiveLabels<
     B extends DirectiveBlockState,
     I extends DirectiveInlineState,
 >(md: DirectiveParserHost<B, I>): void {
-    if (Reflect.get(md, BLOCK_LABELS_CONSTRAINED)) {
-        return;
-    }
-
+    const host = boundaryHost(md);
     const rule = runtimeRules<B>(md.block.ruler).find(({name}) => name === 'block_directive');
 
-    if (!rule) {
+    if (!rule || !host || host.wrappedRule === rule.identity) {
         return;
     }
 
     const blockDirectiveRule = withBlockBoundary(rule.fn);
-    if (!Reflect.set(md, BLOCK_LABELS_CONSTRAINED, true)) {
-        throw new TypeError('Cannot mark directive block labels as constrained');
-    }
-    rule.fn = (state, startLine, endLine, silent) => {
+    const wrapped: BoundaryRule<B> = (state, startLine, endLine, silent) => {
         const parseLinkLabel = md.helpers.parseLinkLabel;
 
         md.helpers.parseLinkLabel = (inlineState: I, start: number, disableNested?: boolean) => {
@@ -74,6 +67,8 @@ function constrainBlockDirectiveLabels<
             md.helpers.parseLinkLabel = parseLinkLabel;
         }
     };
+    rule.fn = wrapped;
+    host.wrappedRule = wrapped;
 }
 
 export {
@@ -119,6 +114,8 @@ export const directiveParser = () => {
     return <B extends DirectiveBlockState, I extends DirectiveInlineState>(
         md: DirectiveParserHost<B, I>,
     ) => {
+        // Validate an existing own protocol before the upstream installer mutates this host.
+        boundaryHost(md);
         // The pinned upstream JS installer only installs its two rules and tables.
         // Keep its full native dev declaration out of our public host contract.
         Reflect.apply(directivePlugin, undefined, [md]);

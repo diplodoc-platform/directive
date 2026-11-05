@@ -90,9 +90,11 @@ independent Notes containing tables, baseline discovery indexed
 20,400/81,600/326,400 characters and copied 32,160/128,320/512,640 cells; scoped
 Table discovery indexed/copied zero whole-document characters/cells.
 
-The existing duplicated-Directive dependency graph remains a negative control:
-its module-local opaque registries cannot communicate across physical copies,
-and nested Cut/table output remains incorrect in both baseline and candidate.
-This scanner change does not repair dependency alignment. The prepared common
-archive override graph is a local integration check, not publication or changed
-product pins.
+The original archive with module-local opaque registries remains a failing
+negative control for duplicated Directive copies. The follow-up
+[host-owned protocol](host-boundary-protocol.md) shares boundary registrations
+across byte-identical copies without aligning legitimate native 13/15 peers.
+Actual Viewer plugin-array and mixed-host checks now preserve nested Cut/table
+boundaries in both peer cohorts. The earlier common-archive graph and the new
+mixed-copy graph are local integration checks, not publication or changed product
+pins.
