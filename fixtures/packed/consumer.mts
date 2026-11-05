@@ -9,6 +9,7 @@ import {
     disableInlineDirectives,
     enableBlockDirectives,
     enableInlineDirectives,
+    registerBlockBoundary,
     registerContainerDirective,
     registerInlineDirective,
     registerLeafBlockDirective,
@@ -128,4 +129,22 @@ export function finiteTokenWrites(token: DirectiveToken): void {
     token.attrs?.push(['unsafe', 1]);
     // @ts-expect-error Child token reads cannot accept arbitrary new children.
     token.children?.push('unsafe');
+}
+
+const opaqueRule = () => false;
+md.block.ruler.before('code', 'typed-opaque', opaqueRule);
+registerBlockBoundary(
+    md,
+    'typed-opaque',
+    opaqueRule,
+    (input, start) => {
+        const offset: number = input.bMarks[start];
+        return input.src.slice(offset, input.eMarks[start]) === 'opaque' ? start + 1 : null;
+    },
+    {input: 'scoped'},
+);
+
+export function invalidBoundaryMode(): void {
+    // @ts-expect-error A scoped capability must be opted into with a supported literal mode.
+    registerBlockBoundary(md, 'typed-opaque', opaqueRule, () => null, {input: 'mutable'});
 }

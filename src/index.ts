@@ -129,4 +129,8 @@ export const directiveParser = () => {
 };
 
 export {registerBlockBoundary} from './block-recognizers';
-export type {BlockBoundaryInput, BlockBoundaryRecognizer} from './block-recognizers';
+export type {
+    BlockBoundaryInput,
+    BlockBoundaryRecognizer,
+    BlockBoundaryOptions,
+} from './block-recognizers';

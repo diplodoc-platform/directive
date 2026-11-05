@@ -143,6 +143,10 @@ for (const host of matrix) {
     }
     json(join(dir, 'tsconfig.json'), tsconfig);
     copyFileSync(join(root, 'tests', 'block-boundary.test.ts'), join(dir, 'boundary.test.ts'));
+    copyFileSync(
+        join(root, 'tests', 'block-boundary-performance.test.ts'),
+        join(dir, 'boundary-performance.test.ts'),
+    );
     const validation = readFileSync(join(root, 'tests', 'attribute-validation.test.ts'), 'utf8');
     writeFileSync(
         join(dir, 'attribute-validation.test.ts'),
@@ -227,6 +231,14 @@ process.stdout.write(JSON.stringify({esm: named, cjs: Object.keys(cjs).sort()}) 
     if (host.id === 'mixed') {
         assert.equal(consumerRequire('markdown-it-transform15/package.json').version, '15.0.3');
         const boundary = readFileSync(join(root, 'tests', 'block-boundary.test.ts'), 'utf8');
+        const performance = readFileSync(
+            join(root, 'tests', 'block-boundary-performance.test.ts'),
+            'utf8',
+        );
+        writeFileSync(
+            join(dir, 'boundary-performance-alias.test.ts'),
+            performance.replace("from 'markdown-it'", "from 'markdown-it-transform15'"),
+        );
         writeFileSync(
             join(dir, 'boundary-alias.test.ts'),
             boundary.replace("from 'markdown-it'", "from 'markdown-it-transform15'"),
