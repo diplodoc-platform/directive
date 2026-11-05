@@ -19,6 +19,49 @@ try {
     // The alias is present only in the mixed-host fixture.
 }
 for (const name of hosts) {
+    for (const input of ['snapshot', 'scoped']) {
+        for (const [installer, registrar] of [
+            [first, second],
+            [second, first],
+        ]) {
+            const host = new (require(name))().use(installer.directiveParser());
+            const raw = [];
+            installer.registerContainerDirective(host, 'box', (state, params) => {
+                raw.push(params.content.raw);
+                installer.tokenizeBlockContent(state, params.content);
+                return true;
+            });
+            const rule = () => false;
+            host.block.ruler.before('code', 'opaque', rule);
+            registrar.registerBlockBoundary(
+                host,
+                'opaque',
+                rule,
+                (value, start, end) =>
+                    value.src.slice(
+                        value.bMarks[start] + value.tShift[start],
+                        value.eMarks[start],
+                    ) === 'opaque'
+                        ? Math.min(start + 3, end)
+                        : null,
+                {input},
+            );
+            const current = () =>
+                host.block.ruler.__rules__.find((rule) => rule.name === 'block_directive').fn;
+            const wrapped = current();
+            host.use(registrar.directiveParser()).use(installer.directiveParser());
+            assert.equal(current(), wrapped);
+            host.render(':::box\nopaque\n:::\nend\nreal body\n:::\nAFTER');
+            assert.deepEqual(raw, ['opaque\n:::\nend\nreal body\n']);
+            const replacement = () => false;
+            host.block.ruler.at('block_directive', replacement);
+            host.use(registrar.directiveParser());
+            assert.notEqual(current(), replacement);
+            const replaced = current();
+            host.use(installer.directiveParser());
+            assert.equal(current(), replaced);
+        }
+    }
     const md = new (require(name))().use(first.directiveParser());
     const calls = [];
     first.registerInlineDirective(md, 'constructor', () => {
