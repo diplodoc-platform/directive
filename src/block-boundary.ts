@@ -2,7 +2,7 @@ import type {BlockBoundaryInput} from './block-recognizers';
 import type {BoundaryRule, BoundaryState} from './runtime';
 
 import {blockBoundaries} from './block-recognizers';
-import {assertBoundaryState, assertScanner, registry, runtimeRules} from './runtime';
+import {assertBoundaryState, assertScanner, lookupHandler, runtimeRules} from './runtime';
 
 type Scope = {depth: number; root: boolean; input?: BlockBoundaryInput};
 
@@ -171,7 +171,7 @@ export function withBlockBoundary<B extends BoundaryState>(rule: BoundaryRule<B>
             .slice(start, state.eMarks[startLine])
             .match(/^:{3,}[ \t]*([a-z][a-z0-9_-]*)/i)?.[1];
         const normalizedName = name?.toLowerCase().replace('_', '-');
-        if (!normalizedName || !registry(state.md, 'blockDirectives')[normalizedName]) {
+        if (!normalizedName || !lookupHandler(state.md, 'blockDirectives', normalizedName)) {
             return rule(state, startLine, endLine, silent);
         }
 

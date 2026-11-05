@@ -149,6 +149,12 @@ for (const host of matrix) {
         validation.replace("from '../src'", "from '@diplodoc/directive'"),
     );
 
+    const registryTests = readFileSync(join(root, 'tests', 'registry.test.ts'), 'utf8');
+    writeFileSync(
+        join(dir, 'registry.test.ts'),
+        registryTests.replace("from '../src'", "from '@diplodoc/directive'"),
+    );
+
     npm(
         ['install', '--no-workspaces', '--no-audit', '--no-fund'],
         dir,
@@ -195,6 +201,14 @@ process.stdout.write(JSON.stringify({esm: named, cjs: Object.keys(cjs).sort()}) 
     const exportProbe = spawnSync(process.execPath, ['exports.mjs'], {cwd: dir, encoding: 'utf8'});
     writeFileSync(join(report, 'exports.json'), exportProbe.stdout + exportProbe.stderr);
     assert.equal(exportProbe.status, 0, 'Installed package ESM/CJS exports differ.');
+    copyFileSync(join(fixture, 'registry-copies.mjs'), join(dir, 'registry-copies.mjs'));
+    const copies = spawnSync(process.execPath, ['registry-copies.mjs'], {
+        cwd: dir,
+        encoding: 'utf8',
+    });
+    writeFileSync(join(report, 'registry-copies.log'), copies.stdout + copies.stderr);
+    assert.equal(copies.status, 0, 'Independent runtime copies lost own registrations.');
+
     const builtJs = readFileSync(entry, 'utf8');
     assert(builtJs.includes(license), 'The packed runtime must retain the full upstream license.');
     assert(!/require\(['"]markdown-it-directive['"]\)/.test(builtJs));
@@ -220,6 +234,12 @@ process.stdout.write(JSON.stringify({esm: named, cjs: Object.keys(cjs).sort()}) 
         writeFileSync(
             join(dir, 'attribute-validation-alias.test.ts'),
             validation
+                .replace("from '../src'", "from '@diplodoc/directive'")
+                .replace("from 'markdown-it'", "from 'markdown-it-transform15'"),
+        );
+        writeFileSync(
+            join(dir, 'registry-alias.test.ts'),
+            registryTests
                 .replace("from '../src'", "from '@diplodoc/directive'")
                 .replace("from 'markdown-it'", "from 'markdown-it-transform15'"),
         );

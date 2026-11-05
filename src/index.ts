@@ -4,7 +4,7 @@ import type {BoundaryState} from './runtime';
 import directivePlugin from 'markdown-it-directive';
 
 import {withBlockBoundary} from './block-boundary';
-import {runtimeRules} from './runtime';
+import {registry, runtimeRules} from './runtime';
 
 const BLOCK_LABELS_CONSTRAINED = Symbol('block-labels-constrained');
 
@@ -122,6 +122,8 @@ export const directiveParser = () => {
         // The pinned upstream JS installer only installs its two rules and tables.
         // Keep its full native dev declaration out of our public host contract.
         Reflect.apply(directivePlugin, undefined, [md]);
+        registry(md, 'inlineDirectives');
+        registry(md, 'blockDirectives');
         constrainBlockDirectiveLabels(md);
     };
 };

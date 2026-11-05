@@ -9,7 +9,7 @@ export function isRecord(value: unknown): value is Record<PropertyKey, unknown> 
 export function registry(host: object, key: PropertyKey, create = false): Record<string, unknown> {
     let value: unknown = Reflect.get(host, key);
     if (value === undefined && create) {
-        value = {};
+        value = Object.create(null);
         if (!Reflect.set(host, key, value)) {
             throw new TypeError('Cannot create directive handler registry');
         }
@@ -17,13 +17,25 @@ export function registry(host: object, key: PropertyKey, create = false): Record
     if (!isRecord(value)) {
         throw new TypeError('Directive parser must be installed before registering directives');
     }
+    if (Object.getPrototypeOf(value) !== null) {
+        const normalized: unknown = Object.defineProperties(
+            Object.create(null),
+            Object.getOwnPropertyDescriptors(value),
+        );
+        if (!Reflect.set(host, key, normalized)) {
+            throw new TypeError('Cannot normalize directive handler registry');
+        }
+        if (!isRecord(normalized)) throw new TypeError('Invalid directive handler registry');
+        return normalized;
+    }
     return value;
 }
 
 export function lookupHandler(host: object, key: PropertyKey, name: string): unknown {
     const table: unknown = Reflect.get(host, key);
     if (table === undefined) return undefined;
-    return registry(host, key)[name];
+    const handlers = registry(host, key);
+    return Object.prototype.hasOwnProperty.call(handlers, name) ? handlers[name] : undefined;
 }
 
 export function assertHostState<S>(
