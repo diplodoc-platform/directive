@@ -57,5 +57,9 @@
     "@types/markdown-it": {
       "optional": true
     }
+  },
+  "publishConfig": {
+    "tag": "transform5",
+    "access": "public"
   }
 }
