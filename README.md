@@ -13,14 +13,12 @@
 
 This is a pluggable parser for directive syntax for markdown markup. With it you can easily add implementation for a new block in you markdown project.
 
-## Unreleased compatibility preparation
+## Transform 5 beta compatibility
 
-These installation notes describe the prerelease preparation on this branch. They do not change the published 0.4.0 package's compatibility contract.
-
-Choose the Markdown-it runtime explicitly when installing a supplied prerelease tarball. For example:
+Install the Transform 5 prerelease explicitly and choose the Markdown-it runtime. This prerelease is distributed under the `transform5` npm tag. For example:
 
 ```sh
-npm install ./diplodoc-directive-prerelease.tgz markdown-it@13
+npm install @diplodoc/directive@1.0.0-beta.1 markdown-it@13
 npm install --save-dev @types/markdown-it@13
 ```
 
