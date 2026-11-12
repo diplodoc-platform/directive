@@ -26,6 +26,8 @@ jobs:
         uses: diplodoc-platform/setup-node-action@v1
         with:
           node-version: ${{ vars.NODE_VERSION || '24' }}
+      - name: Verify hoisted patch resolution
+        run: npm run test:patch
       - name: Run type check
         run: npm run typecheck
       - name: Run linter
