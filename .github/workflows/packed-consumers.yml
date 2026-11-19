@@ -31,3 +31,18 @@ jobs:
           name: directive-packed-native${{ matrix.host }}
           path: ${{ runner.temp }}/directive-packed-reports
           retention-days: 7
+
+  workspace-patch:
+    name: Hoisted patch (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: diplodoc-platform/setup-node-action@v1
+        with:
+          node-version: '24'
+      - name: Verify hoisted patch resolution
+        run: npm run test:patch

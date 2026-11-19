@@ -13,18 +13,16 @@
 
 This is a pluggable parser for directive syntax for markdown markup. With it you can easily add implementation for a new block in you markdown project.
 
-## Unreleased compatibility preparation
+## Markdown-it compatibility
 
-These installation notes describe the prerelease preparation on this branch. They do not change the published 0.4.0 package's compatibility contract.
-
-Choose the Markdown-it runtime explicitly when installing a supplied prerelease tarball. For example:
+Choose the Markdown-it runtime when installing Directive 1. For example:
 
 ```sh
-npm install ./diplodoc-directive-prerelease.tgz markdown-it@13
+npm install @diplodoc/directive@1 markdown-it@13
 npm install --save-dev @types/markdown-it@13
 ```
 
-The prepared package bundles markdown-it-directive with its MIT license notice. It no longer installs that dependency's private Markdown-it 12/13 or DefinitelyTyped peers. This removes the previous automatic installation of @types/markdown-it 13: TypeScript consumers using Markdown-it 12, 13 or 14 must install matching declarations explicitly. The declaration peer is optional so native Markdown-it 15 can use its own types.
+Directive 1 bundles markdown-it-directive with its MIT license notice. It no longer installs that dependency's private Markdown-it 12/13 or DefinitelyTyped peers. This removes the previous automatic installation of @types/markdown-it 13: TypeScript consumers using Markdown-it 12, 13 or 14 must install matching declarations explicitly. The declaration peer is optional so native Markdown-it 15 can use its own types.
 
 | Runtime tested     | Declarations used for validation                          |
 | ------------------ | --------------------------------------------------------- |
@@ -35,9 +33,9 @@ The prepared package bundles markdown-it-directive with its MIT license notice. 
 
 The explicit LinkifyIt declaration version in the 12 fixture avoids the incompatible version selected by that old declaration package's wildcard dependency. JavaScript consumers do not need declaration packages. A broad required declaration peer cannot automatically select the type major matching each runtime, so the package leaves that choice to the consumer.
 
-The 14 TypeScript route uses the exact tuple above. The newer @types/markdown-it 14.2.0 exposes incompatible ESM/CommonJS parser types, and the older 14 declarations also disagree across module modes when mdurl 2.1.0's own declarations are selected. These are recorded prerelease compatibility limits; neither replacing the consumer's types nor disabling library checks is necessary for the supported tuple. Runtime 14 support also covers hosts such as the embedded YFMLint SDK whose public declarations still use the 13 type family.
+The 14 TypeScript route uses the exact tuple above. The newer @types/markdown-it 14.2.0 exposes incompatible ESM/CommonJS parser types, and the older 14 declarations also disagree across module modes when mdurl 2.1.0's own declarations are selected. These are known compatibility limits; neither replacing the consumer's types nor disabling library checks is necessary for the supported tuple. Runtime 14 support also covers hosts such as the embedded YFMLint SDK whose public declarations still use the 13 type family.
 
-The explicit root API exports remain unchanged. This preparation intentionally removes the old dependency's incidental ambient `markdown-it` aliases, including `Directive*Handler*` and `MarkdownItWithDirectives`, and its direct handler-map typing. Consumers relying on those ambient names or direct maps must migrate to the package's explicit registration helpers and exported parameter/handler types. This is not complete source or ambient compatibility, and no global augmentation shim is installed.
+The explicit root API exports remain unchanged. Directive 1 removes the old dependency's incidental ambient `markdown-it` aliases, including `Directive*Handler*` and `MarkdownItWithDirectives`, and its direct handler-map typing. Consumers relying on those ambient names or direct maps must migrate to the package's explicit registration helpers and exported parameter/handler types. This is not complete source or ambient compatibility, and no global augmentation shim is installed.
 
 The emitted declarations use type import attributes with an explicit resolution mode. Validation uses TypeScript 6.0.3 with strict NodeNext checks in ESM and CommonJS modes; no compiler minimum beyond that tested configuration is claimed.
 
