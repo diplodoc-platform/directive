@@ -26,13 +26,14 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "prepublishOnly": "npm run lint && npm run test && npm run build",
+    "prepublishOnly": "npm run typecheck && npm run lint && npm run test && npm run build",
     "lint": "lint",
     "lint:fix": "lint fix",
     "pre-commit": "lint-staged",
-    "prepare": "patch-package --error-on-fail 1>&2 && (husky || true)",
+    "prepare": "node scripts/patch-upstream.mjs 1>&2 && (husky || true)",
     "lock": "npm install --no-workspaces --package-lock-only --ignore-scripts",
-    "test:packed": "node scripts/test-packed.mjs"
+    "test:packed": "node scripts/test-packed.mjs",
+    "test:patch": "node --test scripts/patch-upstream.test.mjs"
   },
   "devDependencies": {
     "@diplodoc/infra": "2.3.0",
@@ -57,5 +58,8 @@
     "@types/markdown-it": {
       "optional": true
     }
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
