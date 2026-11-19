@@ -9,7 +9,7 @@ export function isRecord(value: unknown): value is Record<PropertyKey, unknown> 
 export function registry(host: object, key: PropertyKey, create = false): Record<string, unknown> {
     let value: unknown = Reflect.get(host, key);
     if (value === undefined && create) {
-        value = {};
+        value = Object.create(null);
         if (!Reflect.set(host, key, value)) {
             throw new TypeError('Cannot create directive handler registry');
         }
@@ -17,13 +17,25 @@ export function registry(host: object, key: PropertyKey, create = false): Record
     if (!isRecord(value)) {
         throw new TypeError('Directive parser must be installed before registering directives');
     }
+    if (Object.getPrototypeOf(value) !== null) {
+        const normalized: unknown = Object.defineProperties(
+            Object.create(null),
+            Object.getOwnPropertyDescriptors(value),
+        );
+        if (!Reflect.set(host, key, normalized)) {
+            throw new TypeError('Cannot normalize directive handler registry');
+        }
+        if (!isRecord(normalized)) throw new TypeError('Invalid directive handler registry');
+        return normalized;
+    }
     return value;
 }
 
 export function lookupHandler(host: object, key: PropertyKey, name: string): unknown {
     const table: unknown = Reflect.get(host, key);
     if (table === undefined) return undefined;
-    return registry(host, key)[name];
+    const handlers = registry(host, key);
+    return Object.prototype.hasOwnProperty.call(handlers, name) ? handlers[name] : undefined;
 }
 
 export function assertHostState<S>(
@@ -67,7 +79,13 @@ export type BoundaryState = {
 
 export type BoundaryRule<S> = (state: S, start: number, end: number, silent: boolean) => boolean;
 
-type Rule<S> = {name: string; enabled: boolean; fn: BoundaryRule<S>};
+type Rule<S> = {
+    name: string;
+    enabled: boolean;
+    alt: string[];
+    readonly identity: unknown;
+    fn: BoundaryRule<S>;
+};
 
 /**
  * Access the existing runtime rule list without exposing its private shape.
@@ -84,6 +102,8 @@ export function runtimeRules<S>(ruler: object): Rule<S>[] {
             !isRecord(rule) ||
             typeof rule.name !== 'string' ||
             typeof rule.enabled !== 'boolean' ||
+            !Array.isArray(rule.alt) ||
+            !rule.alt.every((item: unknown) => typeof item === 'string') ||
             typeof rule.fn !== 'function'
         ) {
             throw new TypeError('Invalid native block rule');
@@ -91,6 +111,10 @@ export function runtimeRules<S>(ruler: object): Rule<S>[] {
         return {
             name: rule.name,
             enabled: rule.enabled,
+            alt: rule.alt as string[],
+            get identity(): unknown {
+                return rule.fn;
+            },
             get fn(): BoundaryRule<S> {
                 const fn = rule.fn;
                 if (typeof fn !== 'function') throw new TypeError('Invalid native block rule');
