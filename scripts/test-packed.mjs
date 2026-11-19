@@ -18,13 +18,15 @@ import {fileURLToPath} from 'node:url';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const sourceRequire = createRequire(join(root, 'package.json'));
 const npmCli = process.env.npm_execpath;
-assert(npmCli, 'Run through npm run test:packed [-- 12|13|14|15|all].');
+assert(npmCli, 'Run through npm run test:packed with an optional host selector.');
 
 const hosts = [
     {id: '12', runtime: '12.3.2', types: '12.2.3', extra: {'@types/linkify-it': '3.0.5'}},
     {id: '13', runtime: '13.0.2', types: '13.0.9', extra: {}},
     {id: '14', runtime: '14.1.0', types: '14.1.0', extra: {mdurl: '2.0.0'}},
+    {id: '14-with-types-14.2', runtime: '14.1.0', types: '14.2.0', extra: {mdurl: '2.1.0'}},
     {id: '15', runtime: '15.0.3', types: null, extra: {}},
+    {id: '15-with-types-14.2', runtime: '15.0.3', types: '14.2.0', extra: {}},
     {
         id: 'mixed',
         runtime: '13.0.2',
