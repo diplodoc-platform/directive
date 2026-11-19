@@ -218,7 +218,10 @@ describe('Directive', () => {
 
                             const token = state.push('inl_open', 'span', 1);
                             if (params.attrs) {
-                                token.attrs = Object.entries(params.attrs);
+                                token.attrs = Object.entries(params.attrs).map(([key, value]) => [
+                                    key,
+                                    Array.isArray(value) ? value.join(' ') : value,
+                                ]);
                             }
                             tokenizeInlineContent(state, params.content);
                             state.push('inl_close', 'span', -1);
@@ -278,7 +281,9 @@ describe('Directive', () => {
                     token: 'leaf-block',
                     tag: 'div',
                     attrs: ({attrs}, env) => ({
-                        'data-block': attrs!['data-block'],
+                        'data-block': Array.isArray(attrs!['data-block'])
+                            ? attrs!['data-block'].join(' ')
+                            : attrs!['data-block'],
                         'data-env': env.blck_env,
                     }),
                     meta: ({attrs}, env) => ({
