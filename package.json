@@ -51,7 +51,7 @@
     "vitest": "^3.2.4"
   },
   "peerDependencies": {
-    "@types/markdown-it": "^12.2.3 || ^13.0.9 || 14.1.0",
+    "@types/markdown-it": "^12.2.3 || ^13.0.9 || 14.1.0 || 14.2.0",
     "markdown-it": "^12.0.0 || ^13.0.0 || ^14.1.0 || ^15.0.3"
   },
   "peerDependenciesMeta": {
