@@ -258,3 +258,30 @@ run only the coexistence fixture.
 A plugin that owns a block grammar can call `registerBlockBoundary(md, ruleName, rule, recognize)` to keep directive delimiters inside its blocks from closing an enclosing directive. `rule` is the exact callback installed in the host block ruler. The recognizer is ignored when that rule is disabled or replaced.
 
 The recognizer receives a frozen source and line-position snapshot and returns the exclusive ending line, or `null` when no complete block matches. It may run during lookahead and must have no side effects. If it calls parser helpers, those helpers must also be safe for lookahead. The snapshot does not expose the mutable host parser.
+
+Owners whose recognizers finish synchronously and do not retain their input can
+explicitly opt into a scoped read-only view:
+
+```ts
+registerBlockBoundary(md, ruleName, rule, recognize, {input: 'scoped'});
+```
+
+In scoped mode, line arrays keep absolute line indexes and current list/quote
+offsets. Read them only during the callback. Writes are rejected; retained array
+access after the callback throws. Copy needed values during the callback if they
+must outlive it. The view does not expose mutable parser state. The default
+`input: 'snapshot'` mode continues to return stable frozen arrays that remain
+readable after parsing, including after later parses on the same host.
+
+Boundary discovery reuses native scanner configuration only while host options,
+constructors, block-rule order/callbacks/enablement/alt chains and opaque
+registrations remain unchanged. Mutable object-valued or accessor options
+conservatively disable configuration reuse. Each scan has independent state,
+source-index overlays, tokens and environment, including during reentrant calls.
+The host has already indexed the source; scanner states initialize from an empty
+source and read its existing line offsets without full-document copies.
+
+This bounds source indexing and automatic line-array copying for native rules
+and explicitly scoped recognizers. Default snapshot recognizers retain their
+existing full-array copy cost for compatibility; adopting scoped input is a
+separate, explicit owner decision. See [scanner performance contract](docs/scanner-performance.md).
