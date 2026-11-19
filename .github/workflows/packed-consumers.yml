@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        host: ['12', '13', '14', '15', 'mixed']
+        host: ['12', '13', '14', '14-with-types-14.2', '15', '15-with-types-14.2', 'mixed']
     steps:
       - uses: actions/checkout@v5
       - uses: diplodoc-platform/setup-node-action@v1
