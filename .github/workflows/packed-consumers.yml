@@ -1,0 +1,48 @@
+name: Packed consumers
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  packed-consumers:
+    name: Markdown-it host ${{ matrix.host }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        host: ['12', '13', '14', '14-with-types-14.2', '15', '15-with-types-14.2', 'mixed']
+    steps:
+      - uses: actions/checkout@v5
+      - uses: diplodoc-platform/setup-node-action@v1
+        with:
+          node-version: '24'
+      - name: Build, pack and validate an independent consumer
+        env:
+          PACKED_CONSUMER_REPORT_DIR: ${{ runner.temp }}/directive-packed-reports
+        run: npm run test:packed -- ${{ matrix.host }}
+      - name: Upload packed consumer evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: directive-packed-native${{ matrix.host }}
+          path: ${{ runner.temp }}/directive-packed-reports
+          retention-days: 7
+
+  workspace-patch:
+    name: Hoisted patch (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: diplodoc-platform/setup-node-action@v1
+        with:
+          node-version: '24'
+      - name: Verify hoisted patch resolution
+        run: npm run test:patch
