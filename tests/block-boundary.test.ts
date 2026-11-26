@@ -59,6 +59,20 @@ describe('container block boundaries', () => {
     });
 
     it.each([
+        '<div>content</div>',
+        '<div>\ncontent\n</div>',
+        '<div>\ncontent\n\nmore content\n</div>',
+    ])('finds the visibility closer after a complete plain HTML element: %s', (body) => {
+        const {md, calls} = parser({html: true});
+        const source = `:::visibility\n${body}\n:::\nAFTER`;
+        const tokens = md.parse(source, {});
+        expect(calls).toHaveLength(1);
+        expect(calls[0].content.raw).toBe(`${body}\n`);
+        expect(calls[0].endLine).toBe(source.split('\n').length - 1);
+        expect(tokens.at(-2)?.content).toBe('AFTER');
+    });
+
+    it.each([
         ['list', '- :::box\n  ```\n  :::\n  :::example\n  ```\n  :::\n\nAFTER'],
         ['quote', '> :::box\n> ```\n> :::\n> :::example\n> ```\n> :::\n\nAFTER'],
         [
