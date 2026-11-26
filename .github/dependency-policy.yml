@@ -25,6 +25,7 @@ entries:
       - yfmlint
       - vsc
       - ajv
+      - screencaster
       - algolia-extension
       - color-extension
       - cut-extension
@@ -33,6 +34,7 @@ entries:
       - html-extension
       - latex-extension
       - mermaid-extension
+      - notes-extension
       - openapi-extension
       - page-constructor-extension
       - quote-link-extension
@@ -52,8 +54,27 @@ entries:
       distribution: https://github.com/diplodoc-platform/infra/actions/runs/37463691539
     owner: diplodoc-platform/team
     introduced-at: 2026-10-06T00:00:00.000Z
-    review-after: 2026-12-01T00:00:00.000Z
-    expires-at: 2026-12-01T00:00:00.000Z
+    review-after: 2027-01-15T00:00:00.000Z
+    expires-at: 2027-02-01T00:00:00.000Z
     exit-criteria:
       - Reassess the managed dev-tool pin contract after stabilization
       - Keep distribution review-only until hosted pilots pass
+  - id: DEP-0008
+    dependency: markdown-it-directive
+    repositories:
+      - directive
+    allowed-version: 2.0.6
+    ignored-versions: []
+    risk: high
+    category: patched-dependency
+    verification-profile: ecosystem
+    reason: The Directive adapter applies a source patch to this exact version.
+    evidence:
+      patch: https://github.com/diplodoc-platform/directive/pull/70
+    owner: diplodoc-platform/team
+    introduced-at: 2026-11-26T00:00:00.000Z
+    review-after: 2027-01-15T00:00:00.000Z
+    expires-at: 2027-02-01T00:00:00.000Z
+    exit-criteria:
+      - The verified upstream version includes the required parser fixes
+      - Directive installed-package and workspace patch checks pass without the local patch
