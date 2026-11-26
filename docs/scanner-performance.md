@@ -56,9 +56,9 @@ local validation overlays are not product dependency-pin changes.
   exceptions, reentrant recognizers, and input immutability/lifetime.
 - Change host options, constructors, rule callbacks/order/alt/enablement and
   boundary registrations between parses; require fresh matching configuration.
-- Run strict packed consumer tests on native MarkdownIt 12, 13, 14, 15 and a mixed
-  root-13/aliased-15 graph. Compare actual old/new tokens and HTML, not only source
-  unit results. Timing measurements supplement deterministic work counts.
+- Run strict packed consumer tests on native Markdown-it 15, with and without
+  legacy type declarations installed by another dependency. Compare actual tokens
+  and HTML. Timing measurements supplement deterministic work counts.
 
 ## Local archived comparison (2026-11-05)
 
