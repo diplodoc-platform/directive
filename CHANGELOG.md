@@ -1,5 +1,30 @@
 # Changelog
 
+## [1.0.0](https://github.com/diplodoc-platform/directive/compare/v0.4.0...v1.0.0) (2026-11-26)
+
+
+### ⚠ BREAKING CHANGES
+
+* **directive:** Directive requires Markdown-it 15.0.3 or later within major 15. Use the explicit registration helpers and types instead of upstream ambient aliases and direct handler maps.
+
+### Features
+
+* **directive:** support native Markdown-it hosts ([72fb300](https://github.com/diplodoc-platform/directive/commit/72fb3003acb674149e6c52d52231c7aa31861a02))
+
+
+### Bug Fixes
+
+* **directive:** preserve opaque boundaries and handler ownership ([62df726](https://github.com/diplodoc-platform/directive/commit/62df726b01e3626bfbdab5bc1a63aa0bdc01eb37))
+* **directive:** recover closers after complete plain HTML ([953321d](https://github.com/diplodoc-platform/directive/commit/953321db2c3cc49a1b62da8b7424ba036f31e736))
+* **directive:** require Markdown-it 15 for the stable major ([7af003b](https://github.com/diplodoc-platform/directive/commit/7af003b4121470f707017d48f161dda88826ff93))
+* **directive:** verify patching in npm workspaces ([5ec0530](https://github.com/diplodoc-platform/directive/commit/5ec0530bbb0d530d7c890d14d6584db3d94a9c6c))
+* **types:** accept Markdown-it 14.2 declarations ([b7f9784](https://github.com/diplodoc-platform/directive/commit/b7f9784ae4fbbba073459fb87590aa988abba8f4))
+
+
+### Performance Improvements
+
+* **directive:** bound container scanning across parser copies ([935b1f1](https://github.com/diplodoc-platform/directive/commit/935b1f105072fb6f7bb81fa4b6e3c508ac97c974))
+
 ## [0.4.0](https://github.com/diplodoc-platform/directive/compare/v0.3.6...v0.4.0) (2026-09-15)
 
 
