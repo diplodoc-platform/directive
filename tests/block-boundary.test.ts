@@ -1,4 +1,5 @@
 import type {BlockBoundaryInput, ContainerDirectiveParams} from '@diplodoc/directive';
+import type {MarkdownItOptions} from 'markdown-it';
 
 import MarkdownIt from 'markdown-it';
 import {describe, expect, it, vi} from 'vitest';
@@ -17,7 +18,7 @@ type StateBlock = Parameters<
     Parameters<InstanceType<typeof MarkdownIt>['block']['ruler']['push']>[1]
 >[0];
 
-function parser(options: MarkdownIt.Options = {}) {
+function parser(options: MarkdownItOptions = {}) {
     const md = new MarkdownIt(options).use(directiveParser());
     const calls: ContainerDirectiveParams[] = [];
     for (const name of ['box', 'inner', 'no-translate', 'visibility']) {

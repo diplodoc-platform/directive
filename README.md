@@ -15,10 +15,10 @@ This is a pluggable parser for directive syntax for markdown markup. With it you
 
 ## Markdown-it compatibility
 
-The Directive 1 prerelease on the `transform5` tag requires Markdown-it 15.0.3 or later within major 15:
+Directive 1 requires Markdown-it 15.0.3 or later within major 15:
 
 ```sh
-npm install @diplodoc/directive@transform5 markdown-it@^15.0.3
+npm install @diplodoc/directive@^1 markdown-it@^15.0.3
 ```
 
 TypeScript consumers use the declarations bundled with Markdown-it 15. No additional `@types/markdown-it` installation is needed. Directive 1 bundles `markdown-it-directive` with its MIT license notice.

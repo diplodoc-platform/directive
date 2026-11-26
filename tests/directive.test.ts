@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
-import type MarkdownIt from 'markdown-it';
 import type {
     ContainerDirectiveParams,
     InlineDirectiveParams,
     LeafBlockDirectiveParams,
 } from '@diplodoc/directive';
+import type {MarkdownIt} from 'markdown-it';
 
 import MarkdownItImpl from 'markdown-it';
 import markdownItAttrs from 'markdown-it-attrs';
@@ -24,7 +24,7 @@ import {
     tokenizeInlineContent,
 } from '@diplodoc/directive';
 
-const html = (text: string, {plugins}: {plugins?: MarkdownIt.PluginSimple[]} = {}) => {
+const html = (text: string, {plugins}: {plugins?: ((md: MarkdownIt) => void)[]} = {}) => {
     const md = new MarkdownItImpl().use(directiveParser());
     for (const plugin of plugins ?? []) {
         md.use(plugin);

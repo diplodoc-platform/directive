@@ -21,18 +21,8 @@ const npmCli = process.env.npm_execpath;
 assert(npmCli, 'Run through npm run test:packed with an optional host selector.');
 
 const hosts = [
-    {id: '12', runtime: '12.3.2', types: '12.2.3', extra: {'@types/linkify-it': '3.0.5'}},
-    {id: '13', runtime: '13.0.2', types: '13.0.9', extra: {}},
-    {id: '14', runtime: '14.1.0', types: '14.1.0', extra: {mdurl: '2.0.0'}},
-    {id: '14-with-types-14.2', runtime: '14.1.0', types: '14.2.0', extra: {mdurl: '2.1.0'}},
-    {id: '15', runtime: '15.0.3', types: null, extra: {}},
-    {id: '15-with-types-14.2', runtime: '15.0.3', types: '14.2.0', extra: {}},
-    {
-        id: 'mixed',
-        runtime: '13.0.2',
-        types: '13.0.9',
-        extra: {'markdown-it-transform15': 'npm:markdown-it@15.0.3'},
-    },
+    {id: '15', runtime: '15.0.3', types: null},
+    {id: '15-with-types-14.2', runtime: '15.0.3', types: '14.2.0'},
 ];
 const selected = process.argv[2] ?? 'all';
 assert(process.argv.length <= 3, 'Expected one host selector.');
@@ -113,7 +103,6 @@ for (const host of matrix) {
         'markdown-it': host.runtime,
         typescript: sourceRequire('typescript/package.json').version,
         vitest: sourceRequire('vitest/package.json').version,
-        ...host.extra,
     };
     if (host.types) {
         dependencies['@types/markdown-it'] = host.types;
@@ -129,20 +118,6 @@ for (const host of matrix) {
     writeFileSync(join(dir, 'consumer.cts'), cjs);
     const tsconfig = JSON.parse(readFileSync(join(fixture, 'tsconfig.json'), 'utf8'));
     tsconfig.include.push('node_modules/@diplodoc/directive/build/**/*.d.ts');
-    if (host.id === 'mixed') {
-        const mixed = readFileSync(join(fixture, 'mixed.mts'), 'utf8');
-        writeFileSync(join(dir, 'mixed.mts'), mixed);
-        writeFileSync(
-            join(dir, 'mixed.cts'),
-            mixed
-                .replace(importLine, "import MarkdownIt = require('markdown-it');")
-                .replace(
-                    "import MarkdownIt15 from 'markdown-it-transform15';",
-                    "import MarkdownIt15 = require('markdown-it-transform15');",
-                ),
-        );
-        tsconfig.include.push('mixed.mts', 'mixed.cts');
-    }
     json(join(dir, 'tsconfig.json'), tsconfig);
     copyFileSync(join(root, 'tests', 'block-boundary.test.ts'), join(dir, 'boundary.test.ts'));
     copyFileSync(
@@ -162,12 +137,14 @@ for (const host of matrix) {
     );
 
     npm(
-        ['install', '--no-workspaces', '--no-audit', '--no-fund'],
+        ['install', '--strict-peer-deps', '--no-workspaces', '--no-audit', '--no-fund'],
         dir,
         join(report, 'install.log'),
     );
     const consumerRequire = createRequire(join(dir, 'package.json'));
     const entry = consumerRequire.resolve('@diplodoc/directive');
+    const installed = consumerRequire('@diplodoc/directive/package.json');
+    assert.deepEqual(installed.peerDependencies, {'markdown-it': '^15.0.3'});
     const installedManifest = manifest(
         dirname(consumerRequire.resolve('@diplodoc/directive/package.json')),
     );
@@ -230,35 +207,6 @@ process.stdout.write(JSON.stringify({esm: named, cjs: Object.keys(cjs).sort()}) 
 
     npm(['run', 'typecheck'], dir, join(report, 'types.log'));
     npm(['test'], dir, join(report, 'runtime.log'));
-    if (host.id === 'mixed') {
-        assert.equal(consumerRequire('markdown-it-transform15/package.json').version, '15.0.3');
-        const boundary = readFileSync(join(root, 'tests', 'block-boundary.test.ts'), 'utf8');
-        const performance = readFileSync(
-            join(root, 'tests', 'block-boundary-performance.test.ts'),
-            'utf8',
-        );
-        writeFileSync(
-            join(dir, 'boundary-performance-alias.test.ts'),
-            performance.replace("from 'markdown-it'", "from 'markdown-it-transform15'"),
-        );
-        writeFileSync(
-            join(dir, 'boundary-alias.test.ts'),
-            boundary.replace("from 'markdown-it'", "from 'markdown-it-transform15'"),
-        );
-        writeFileSync(
-            join(dir, 'attribute-validation-alias.test.ts'),
-            validation
-                .replace("from '../src'", "from '@diplodoc/directive'")
-                .replace("from 'markdown-it'", "from 'markdown-it-transform15'"),
-        );
-        writeFileSync(
-            join(dir, 'registry-alias.test.ts'),
-            registryTests
-                .replace("from '../src'", "from '@diplodoc/directive'")
-                .replace("from 'markdown-it'", "from 'markdown-it-transform15'"),
-        );
-        npm(['test'], dir, join(report, 'runtime-mixed.log'));
-    }
     const tree = npm(['ls', '--all', '--json'], dir, join(report, 'installed-tree.json'));
     json(join(report, 'proof.json'), {host, hostPath, entry, tarSha256, tree: JSON.parse(tree)});
     copyFileSync(join(dir, 'package.json'), join(report, 'package.json'));
