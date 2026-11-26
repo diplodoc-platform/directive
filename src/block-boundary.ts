@@ -5,9 +5,9 @@ import {blockBoundaries} from './block-recognizers';
 import {copyOnWriteLines, recognizeScoped, snapshotInput} from './block-boundary-state';
 import {assertBoundaryState, assertScanner, isRecord, lookupHandler, runtimeRules} from './runtime';
 
-type Scope = {depth: number; root: boolean; input?: BlockBoundaryInput};
+type Scope = {depth: number; root: boolean; input?: BlockBoundaryInput; plainHtmlEndLine?: number};
 
-type Invocation = {closingLine: number; scopes: Scope[]};
+type Invocation = {closingLine: number; scopes: Scope[]; ambiguousHtml?: boolean};
 type Configuration = ReturnType<typeof configuration>;
 const scanners = new WeakMap<
     object,
@@ -103,6 +103,32 @@ function sameConfiguration(before: Configuration, after: Configuration): boolean
     );
 }
 
+const PLAIN_HTML_OPEN = /^<([a-z][a-z0-9-]*)>/i;
+const RAW_HTML_ELEMENTS =
+    /^(?:iframe|noembed|noframes|noscript|plaintext|pre|script|style|textarea|xmp)$/i;
+const CLOSING_MARKER = /^:{3,}[ \t]*$/;
+
+function plainHtmlEnd(state: BoundaryState, begin: number, end: number): number {
+    const {src, bMarks, tShift, eMarks} = state;
+    const start = bMarks[begin] + tShift[begin];
+    const opening = PLAIN_HTML_OPEN.exec(src.slice(start, eMarks[begin]));
+    if (!opening || RAW_HTML_ELEMENTS.test(opening[1])) {
+        return -1;
+    }
+
+    const closing = `</${opening[1].toLowerCase()}>`;
+    for (let line = begin; line < end; line++) {
+        const offset = line === begin ? start + opening[0].length : bMarks[line] + tShift[line];
+        const text = src.slice(offset, eMarks[line]);
+        const tag = text.indexOf('<');
+        if (tag !== -1) {
+            return text.slice(tag).trimEnd().toLowerCase() === closing ? line + 1 : -1;
+        }
+    }
+
+    return -1;
+}
+
 function createScanner(settings: Configuration) {
     const md: unknown = Reflect.construct(settings.constructor, ['commonmark', settings.options]);
     assertScanner(md);
@@ -166,6 +192,54 @@ function createScanner(settings: Configuration) {
                 }
                 scanState.line = next;
             }
+            return matched;
+        };
+    }
+    const html = nativeRules.find(({name}) => name === 'html_block');
+    if (html) {
+        const htmlRule = html.fn;
+        html.fn = (scanState, begin, end, silent) => {
+            const matched = htmlRule(scanState, begin, end, silent);
+            if (!matched || silent) {
+                return matched;
+            }
+
+            const active = invocation(scanState);
+            if (active.ambiguousHtml) {
+                return matched;
+            }
+
+            // An ordinary HTML block ends at a blank line in Markdown-it. A
+            // completed element can therefore mask the next directive closer.
+            // Only recognize unambiguous, explicitly closed, plain elements.
+            const scope = active.scopes[active.scopes.length - 1];
+            const nativeEnd = scanState.line;
+            for (let line = begin; line < nativeEnd; ) {
+                const after =
+                    line === scope.plainHtmlEndLine ? line + 1 : plainHtmlEnd(scanState, line, end);
+                if (after < 0) {
+                    // Another native block after a blank line could still be
+                    // inside this markup, so avoid recovering a closer there.
+                    active.ambiguousHtml = true;
+                    return matched;
+                }
+                if (after > nativeEnd) {
+                    // Preserve all ordinary Markdown boundaries between native
+                    // HTML blocks, including a directive closer on such a line.
+                    scope.plainHtmlEndLine = after - 1;
+                    return matched;
+                }
+                if (after < nativeEnd && scanState.sCount[after] >= scanState.blkIndent) {
+                    const start = scanState.bMarks[after] + scanState.tShift[after];
+                    const text = scanState.src.slice(start, scanState.eMarks[after]);
+                    if (CLOSING_MARKER.test(text)) {
+                        marker(scanState, after, end, false);
+                        return matched;
+                    }
+                }
+                line = after;
+            }
+
             return matched;
         };
     }
